@@ -9,16 +9,16 @@ mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 with open('userJSON.json') as file:
 	data = json.load(file)
 
-if(data["CSname"] == ""):
+if(len(data["CSname"]) == 0):
 	addressName = 'localhost'
 else:
 	addressName = data["CSname"]
 
 
-if(data["CSport"] == "")
+if(len(data["CSport"]) == 0):
 	port = 58032
 else:
-	port = data["CSport"]
+	port = int(float(data["CSport"]))
 
 #gets the IPV4 correspondent to the addressName
 address = socket.gethostbyname(addressName)
@@ -32,20 +32,21 @@ mySocket.connect((address, port))
 message = input()
 
 if (message[0:len('login')] == 'login'):
+
+	message = "AUT" + message[len('login'):] + "\n"
 	mySocket.send(message.encode())
 	
 	message = mySocket.recv(buffersize)
+	message = message.decode()
 
-	print(message.decode())
+	if(message[0:len("AUR")] == "AUR"):
+		print(message[len("AUR") +1:])
 
 	#Checks the following operation if a new user was created or if he was successfully authenticated
 	message = input()
 
 	if(message == 'dirlist'):
-		LSDCommand()
-
-	mySocket.send(message.encode())
-
+		LSDCommand(mySocket, buffersize)
 else:
 	mySocket.close()
 
