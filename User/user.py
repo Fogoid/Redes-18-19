@@ -9,13 +9,13 @@ mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 with open('userJSON.json') as file:
 	data = json.load(file)
 
-if(len(data["CSname"]) == 0):
+if len(data["CSname"]) == 0 :
 	addressName = 'localhost'
 else:
 	addressName = data["CSname"]
 
 
-if(len(data["CSport"]) == 0):
+if len(data["CSport"]) == 0 :
 	port = 58032
 else:
 	port = int(float(data["CSport"]))
@@ -28,27 +28,58 @@ buffersize = 230;
 #connects the socket to the given adress and port
 mySocket.connect((address, port))
 
-#Makes the autentication of the user
-message = input()
+login_success = 0;
 
-if (message[0:len('login')] == 'login'):
+messageRecv = ''
+messageSent = input()
 
-	message = "AUT" + message[len('login'):] + "\n"
-	mySocket.send(message.encode())
-	
-	message = mySocket.recv(buffersize)
-	message = message.decode()
+login_username = ''
+login_password = ''
 
-	if(message[0:len("AUR")] == "AUR"):
-		print(message[len("AUR") +1:])
+while messageSent != 'exit':
+	messageRecv = ''
 
-	#Checks the following operation if a new user was created or if he was successfully authenticated
-	message = input()
+	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
+	if login_success==0 and messageSent[0:len('login')] == 'login' :
 
-	if(message == 'dirlist'):
-		LSDCommand(mySocket, buffersize)
-else:
-	mySocket.close()
+		messageSent = 'AUT' + messageSent[len('login'):] + "\n"
+		mySocket.send(messageSent.encode())
+		
+		messageRecv = mySocket.recv(buffersize)
+		messageRecv = messageRecv.decode()
 
+		if messageRecv[0:len('AUR')] == 'AUR' :
+			print(messageRecv[len('AUR') +1:], end='')
+
+		if messageRecv[len('AUR') +1:] != 'NOK' :
+			login_username = messageSent[len('login')-1:len('login')+5]
+			login_password = messageSent[len('login')+5:len('login ')+14]
+			login_success=1;
+
+	#Should delete user if there are no dictories stored in the BS server
+	elif messageSent == 'deluser' and login_success:
+		login_success = DLUCommand()
+
+	elif messageSent[0:len('backup ')] == 'backup '  and login_success:
+		print(' ', end="")
+
+	elif messageSent[0:len('restore ')] == 'restore ' and login_success:
+		print(' ', end="")
+
+	elif messageSent == 'dirlist' and login_success:
+		login_success = LSDCommand(mySocket, buffersize)
+		#messageSent = login_username + ' ' + login_password /***FIX ME***/
+		#mySocket.send(messageSent.encode())				/***FIX ME***/ [Errno 32] Broken Pipe
+
+	elif messageSent[0:len('filelist ')] == 'filelist ' and login_success:
+		print(' ', end="")
+
+	elif messageSent[0:len('delete ')] == 'delete ' and login_success:
+		print(' ', end="")
+
+	elif messageSent == 'logout' and login_success:
+		login_success = 0;
+
+	messageSent = input()
 
 mySocket.close()
