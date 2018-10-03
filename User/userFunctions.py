@@ -12,6 +12,17 @@ def getConnectionDetails():
 	
 	return (connectionDetails.n, connectionDetails.p)
 	
+def authenticateUser():
+
+	userLogin = input()
+
+	while userLogin[0: len('login')] != login or userLogin[len('login')+1:] != 15:
+
+
+
+
+
+
 def recvMessage(mySocket, size, msgSent):
 	
 	mySocket.send(msgSent.encode())
@@ -25,6 +36,9 @@ def recvMessage(mySocket, size, msgSent):
 	msgRecv = msgRecv.decode()
 
 	return msgRecv
+
+def AUTCommand(mySocket, size):
+	msgSent = "AUT"
 
 def LSDCommand(mySocket, size):
 	

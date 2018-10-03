@@ -20,30 +20,18 @@ login_success = 0;
 msgRecv = ''
 msgSent = input()
 
-login_username = ''
-login_password = ''
+username = ''
+userPassword = ''
 
 while msgSent != 'exit':
 	msgRecv = ''
 
+	if login_success == 0:
+		(username, userPassword) =authenticateUser();
+
 	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
-	if login_success==0 and msgSent[0:len('login')] == 'login' :
-
-		msgSent = 'AUT' + msgSent[len('login'):] + "\n"
-		mySocket.send(msgSent.encode())
-		
-		msgRecv = mySocket.recv(buffersize)
-		msgRecv = msgRecv.decode()
-
-		if msgRecv[0:len('AUR')] == 'AUR' :
-			print(msgRecv[len('AUR') +1:], end='')
-
-		if msgRecv[len('AUR') +1:] != 'NOK' :
-			login_username = msgSent[len('login')-1:len('login')+5]
-			login_password = msgSent[len('login')+5:len('login ')+14]
-			login_success=1;
-
 	#Should delete user if there are no dictories stored in the BS server
+
 	elif msgSent == 'deluser' and login_success:
 		login_success = DLUCommand()
 
