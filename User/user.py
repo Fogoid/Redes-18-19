@@ -4,9 +4,6 @@ import sys
 import socket
 from userFunctions import *
 
-#Creates a socket with a given protocol to establish a connection
-mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 (addressName, port) = getConnectionDetails()
 
 address = socket.gethostbyname("tejo.tecnico.ulisboa.pt")
@@ -16,51 +13,51 @@ loggedIn = 0
 
 while not exit:
 
+	#Creates a socket with a given protocol to establish a connection
+	mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	mySocket.connect((address, port))
+	
 	if not loggedIn:
-		mySocket.connect((address, 58011))
 
 		(userName, userPassword, exit) = authenticateUser(mySocket)
-		
-		mySocket.close()
-
+	
 		loggedIn = 1
 
 	else:
-		mySocket.connect((address, 58011))
-		print("AINDA NAO ESTOU MORTO CARALHO")
 		AUTCommand(mySocket, userName, userPassword)
 
-		if exit:
-			break
+	if exit:
+		break
+	else:
+		command = input()
 
-		#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
-		#Should delete user if there are no dictories stored in the BS server
+	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
+	#Should delete user if there are no dictories stored in the BS server
 
-		if command == 'deluser' and login_success:
-			login_success = DLUCommand()
+	if command == 'deluser' and loggedIn:
+		loggedIn = DLUCommand(mySocket)
 
-		elif command[0:len('backup ')] == 'backup '  and login_success:
-			print(' ', end="")
+	elif command[0:len('backup ')] == 'backup '  and loggedIn:
+		print(' ', end="")
 
-		elif command[0:len('restore ')] == 'restore ' and login_success:
-			print(' ', end="")
+	elif command[0:len('restore ')] == 'restore ' and loggedIn:
+		print(' ', end="")
 
-		elif command == 'dirlist' and login_success:
-			login_success = LSDCommand(mySocket, buffersize)
+	elif command == 'dirlist' and loggedIn:
+		LSDCommand(mySocket)
 
-		elif command[0:len('filelist ')] == 'filelist ' and login_success:
-			print(' ', end="")
+	elif command[0:len('filelist ')] == 'filelist ' and loggedIn:
+		print(' ', end="")
 
-		elif command[0:len('delete ')] == 'delete ' and login_success:
-			print(' ', end="")
+	elif command[0:len('delete ')] == 'delete ' and loggedIn:
+		print(' ', end="")
 
-		elif command == 'logout':
-			loggedIn = 0
-		
-		elif command == 'exit':
-			exit = 1
+	elif command == 'logout':
+		loggedIn = 0
+	
+	elif command == 'exit':
+		exit = 1
 
-		mySocket.close()
-
-		if not exit:
-			command = input()
+	mySocket.close()
+	

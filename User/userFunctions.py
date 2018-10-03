@@ -21,16 +21,16 @@ def authenticateUser(mySocket):
 
 		if(userLogin[0: len('login')] == 'login' and len(userLogin[len('login '):]) == len(userExample)):
 
-			print("ola")
 			userName = userLogin[len('login '):len('login ') + 5]
 			userPassword = userLogin[-len("NNNNNNNN"):]
 
 			status = AUTCommand(mySocket, userName, userPassword)
 			
 
-			if status == 'OK':
-				print("User loggin successfull")
-			elif status == 'NOK':
+			print(status)
+			if status == 'OK\n':
+				print("User login successful")
+			elif status == 'NOK\n':
 				print("Wrong password")
 			else:
 				print("Your user was created successfully")
@@ -49,37 +49,30 @@ def sendMessage(mySocket, msgSent):
 def recvMessage(mySocket):
 	msgRecv = ''
 	
-	data = mySocket.recv(128)
-
-	print(data.decode())
-	msgRecv += data.decode()
-
+	msgRecv = mySocket.recv(256).decode()
+	
+	print((msgRecv, "this was a received message"))
 	return msgRecv
 
 def AUTCommand(mySocket, username, password):
 	
 	msgSent = "AUT " + username + " " + password + "\n" 
 
-
 	sendMessage(mySocket, msgSent)
-
-	print(("ainda estou vivo", username, password))
 	
 	msgRecv = recvMessage(mySocket)
-
-	print("ta tudo fodido")
 
 	if msgRecv[0: len("AUR")] == "AUR":
 		status = msgRecv[len("AUR "):]
 		return status
 	
 
-def LSDCommand(mySocket, size):
+def LSDCommand(mySocket):
 	
 	msgSent = "LSD\n"
 	
 	sendMessage(mySocket, msgSent)
-	msgRecv = recvMessage(mySocket, msgSent)
+	msgRecv = recvMessage(mySocket)
 
 	if msgRecv[0: len('LDR ')] == 'LDR ':
 		print(msgRecv[4:], end='')
@@ -87,15 +80,16 @@ def LSDCommand(mySocket, size):
 	return 1
 
 #The command that processes the Delete user request
-def DLUCommand(mySocket, size):
+def DLUCommand(mySocket):
 		
 		msgSent = 'DLU\n'
 		
-		msgRecv = recvMessage(mySocket, size, msgSent)
+		sendMessage(mySocket,msgSent)
+		msgRecv = recvMessage(mySocket)
 
 		if msgRecv[0: len("DLR ")] == "DLR ":
 			print(msgRecv[len("DLR "):], end="")
-			if msgRecv[len("DLR "):] == "OK":
+			if msgRecv[len("DLR "):] == "OK\n":
 				print(msgRecv[len("DLR "):])
 				return 0;
 		return 1;
