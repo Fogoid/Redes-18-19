@@ -2,5 +2,6 @@
 #BS UDP connections
 def UDPConnections():
 	print('Eu existo e cenas, obrigado por tudo pai')
-	while 1:
-		i=0
+	file = open('backupServers.txt','w')
+	file.write('Tejo e fixe\n')
+	file.close()
