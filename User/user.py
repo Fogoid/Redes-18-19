@@ -7,54 +7,60 @@ from userFunctions import *
 #Creates a socket with a given protocol to establish a connection
 mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#has the maximum size of the buffer
-buffersize = 230;
+(addressName, port) = getConnectionDetails()
 
-connectionDetails = getConnectionDetails()
+address = socket.gethostbyname("tejo.tecnico.ulisboa.pt")
 
-#connects the socket to the given adress and port
-mySocket.connect(connectionDetails)
+exit = 0
+loggedIn = 0
 
-login_success = 0;
+while not exit:
 
-msgRecv = ''
-msgSent = input()
+	if not loggedIn:
+		mySocket.connect((address, 58011))
 
-username = ''
-userPassword = ''
+		(userName, userPassword, exit) = authenticateUser(mySocket)
+		
+		mySocket.close()
 
-while msgSent != 'exit':
-	msgRecv = ''
+		loggedIn = 1
 
-	if login_success == 0:
-		(username, userPassword) =authenticateUser();
+	else:
+		mySocket.connect((address, 58011))
+		print("AINDA NAO ESTOU MORTO CARALHO")
+		AUTCommand(mySocket, userName, userPassword)
 
-	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
-	#Should delete user if there are no dictories stored in the BS server
+		if exit:
+			break
 
-	elif msgSent == 'deluser' and login_success:
-		login_success = DLUCommand()
+		#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
+		#Should delete user if there are no dictories stored in the BS server
 
-	elif msgSent[0:len('backup ')] == 'backup '  and login_success:
-		print(' ', end="")
+		if command == 'deluser' and login_success:
+			login_success = DLUCommand()
 
-	elif msgSent[0:len('restore ')] == 'restore ' and login_success:
-		print(' ', end="")
+		elif command[0:len('backup ')] == 'backup '  and login_success:
+			print(' ', end="")
 
-	elif msgSent == 'dirlist' and login_success:
-		login_success = LSDCommand(mySocket, buffersize)
-		#msgSent = login_username + ' ' + login_password /***FIX ME***/
-		#mySocket.send(msgSent.encode())				/***FIX ME***/ [Errno 32] Broken Pipe
+		elif command[0:len('restore ')] == 'restore ' and login_success:
+			print(' ', end="")
 
-	elif msgSent[0:len('filelist ')] == 'filelist ' and login_success:
-		print(' ', end="")
+		elif command == 'dirlist' and login_success:
+			login_success = LSDCommand(mySocket, buffersize)
 
-	elif msgSent[0:len('delete ')] == 'delete ' and login_success:
-		print(' ', end="")
+		elif command[0:len('filelist ')] == 'filelist ' and login_success:
+			print(' ', end="")
 
-	elif msgSent == 'logout' and login_success:
-		login_success = 0;
+		elif command[0:len('delete ')] == 'delete ' and login_success:
+			print(' ', end="")
 
-	msgSent = input()
+		elif command == 'logout':
+			loggedIn = 0
+		
+		elif command == 'exit':
+			exit = 1
 
-mySocket.close()
+		mySocket.close()
+
+		if not exit:
+			command = input()

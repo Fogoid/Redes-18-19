@@ -9,39 +9,77 @@ def getConnectionDetails():
 	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Gives the port the user will connect to')
 
 	connectionDetails = parser.parse_args()
-	
+	print((connectionDetails.n,connectionDetails.p))
 	return (connectionDetails.n, connectionDetails.p)
 	
-def authenticateUser():
+def authenticateUser(mySocket):
 
-	userLogin = input()
+	userExample = 'XXXXX NNNNNNNN'
 
-	#while userLogin[0: len('login')] != login or userLogin[len('login')+1:] != 15:
+	while True: 
+		userLogin = input()
 
+		if(userLogin[0: len('login')] == 'login' and len(userLogin[len('login '):]) == len(userExample)):
 
+			print("ola")
+			userName = userLogin[len('login '):len('login ') + 5]
+			userPassword = userLogin[-len("NNNNNNNN"):]
 
-def recvMessage(mySocket, size, msgSent):
-	
+			status = AUTCommand(mySocket, userName, userPassword)
+			
+
+			if status == 'OK':
+				print("User loggin successfull")
+			elif status == 'NOK':
+				print("Wrong password")
+			else:
+				print("Your user was created successfully")
+
+			return (userName, userPassword, 0)
+
+		elif userLogin == 'exit':
+			return ("XXXXX", "NNNNNNNN", 1)
+		
+		else:
+			print("Please insert login XXXXX NNNNNNNN\nXXXXX - Your login 5 digit number\nNNNNNNNN - Your 8 character long password")
+
+def sendMessage(mySocket, msgSent):
 	mySocket.send(msgSent.encode())
 
-	msgRecv = ''.encode()
+def recvMessage(mySocket):
+	msgRecv = ''
 	
-	while (msgRecv[-1:].decode() != "\n"):
-		msgRecv = msgRecv.decode() + (mySocket.recv(size)).decode()
-		msgRecv = msgRecv.encode()
-	
-	msgRecv = msgRecv.decode()
+	data = mySocket.recv(128)
+
+	print(data.decode())
+	msgRecv += data.decode()
 
 	return msgRecv
 
-def AUTCommand(mySocket, size):
-	msgSent = "AUT"
+def AUTCommand(mySocket, username, password):
+	
+	msgSent = "AUT " + username + " " + password + "\n" 
+
+
+	sendMessage(mySocket, msgSent)
+
+	print(("ainda estou vivo", username, password))
+	
+	msgRecv = recvMessage(mySocket)
+
+	print("ta tudo fodido")
+
+	if msgRecv[0: len("AUR")] == "AUR":
+		status = msgRecv[len("AUR "):]
+		return status
+	
 
 def LSDCommand(mySocket, size):
 	
 	msgSent = "LSD\n"
 	
-	msgRecv = recvMessage(mySocket, size, msgSent)
+	sendMessage(mySocket, msgSent)
+	msgRecv = recvMessage(mySocket, msgSent)
 
 	if msgRecv[0: len('LDR ')] == 'LDR ':
 		print(msgRecv[4:], end='')
