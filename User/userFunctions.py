@@ -5,8 +5,8 @@ import argparse
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
-	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='gives the name of the address do connect')
-	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='gives the port the user will connect to')
+	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Gives the name of the address do connect')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Gives the port the user will connect to')
 
 	connectionDetails = parser.parse_args()
 	
@@ -16,10 +16,7 @@ def authenticateUser():
 
 	userLogin = input()
 
-	while userLogin[0: len('login')] != login or userLogin[len('login')+1:] != 15:
-
-
-
+	#while userLogin[0: len('login')] != login or userLogin[len('login')+1:] != 15:
 
 
 
