@@ -1,6 +1,7 @@
 import socket
 import sys
 import argparse
+import re
 
 def getConnectionDetails():
 
@@ -12,34 +13,37 @@ def getConnectionDetails():
 	print((connectionDetails.n,connectionDetails.p))
 	return (connectionDetails.n, connectionDetails.p)
 	
-def authenticateUser(mySocket):
+def CMDMatcher(msg, pattern):
+	matcher = re.compile(pattern)
+	if matcher.match(msg):
+		return 1
+	return 0
 
-	userExample = 'XXXXX NNNNNNNN'
+def authenticateUser(mySocket):
 
 	while True: 
 		userLogin = input()
+		print(userLogin.encode())
+		if(CMDMatcher(userLogin,'^login\s[0-9]{5}\s[0-9 a-z]{8}$')):
 
-		if(userLogin[0: len('login')] == 'login' and len(userLogin[len('login '):]) == len(userExample)):
+			(cmd, username, password) = userLogin.split(' ')
 
-			userName = userLogin[len('login '):len('login ') + 5]
-			userPassword = userLogin[-len("NNNNNNNN"):]
-
-			status = AUTCommand(mySocket, userName, userPassword)
-			
+			status = AUTCommand(mySocket, username, password)
 
 			print(status)
 			if status == 'OK\n':
 				print("User login successful")
 			elif status == 'NOK\n':
-				print("Wrong password")
+				print("Wrong password") 
+				continue
 			else:
-				print("Your user was created successfully")
+				print("A new user was created with your credentials")
 
-			return (userName, userPassword, 0)
+			cmd = input()
+			return (username, password, 0, cmd)
 
 		elif userLogin == 'exit':
-			return ("XXXXX", "NNNNNNNN", 1)
-		
+			return ("NNNNN", "NNNNNNNN", 1, "none")
 		else:
 			print("Please insert login XXXXX NNNNNNNN\nXXXXX - Your login 5 digit number\nNNNNNNNN - Your 8 character long password")
 
@@ -54,28 +58,30 @@ def recvMessage(mySocket):
 	print((msgRecv, "this was a received message"))
 	return msgRecv
 
+#Prepares the username and password for the server protocol in order to authenticate the user
 def AUTCommand(mySocket, username, password):
 	
 	msgSent = "AUT " + username + " " + password + "\n" 
-
 	sendMessage(mySocket, msgSent)
-	
-	msgRecv = recvMessage(mySocket)
+	msgRecv = recvMessage(mySocket).split(' ')
 
-	if msgRecv[0: len("AUR")] == "AUR":
-		status = msgRecv[len("AUR "):]
+	if CMDMatcher(msgRecv[0], "^AUR$"):
+		status = msgRecv[1]
 		return status
 	
 
 def LSDCommand(mySocket):
 	
 	msgSent = "LSD\n"
-	
 	sendMessage(mySocket, msgSent)
-	msgRecv = recvMessage(mySocket)
+	msgRecv = recvMessage(mySocket).split(' ')
 
-	if msgRecv[0: len('LDR ')] == 'LDR ':
-		print(msgRecv[4:], end='')
+	if CMDMatcher(msgRecv[0], '^LDR$'):
+		msg = "Safe directories: " + msgRecv[1] + "\n"
+		for direc in msgRecv[2:]:
+			msg += direc + "\n"
+
+		print(msg)
 
 	return 1
 
@@ -83,13 +89,15 @@ def LSDCommand(mySocket):
 def DLUCommand(mySocket):
 		
 		msgSent = 'DLU\n'
-		
 		sendMessage(mySocket,msgSent)
-		msgRecv = recvMessage(mySocket)
+		msgRecv = recvMessage(mySocket).split(' ')
 
-		if msgRecv[0: len("DLR ")] == "DLR ":
-			print(msgRecv[len("DLR "):], end="")
-			if msgRecv[len("DLR "):] == "OK\n":
-				print(msgRecv[len("DLR "):])
+		print(msgRecv)
+		if CMDMatcher(msgRecv[0], "^DLR$"):
+			print(msgRecv[1], end="")
+			if CMDMatcher(msgRecv[1], "^OK\n$"):
+				print("User deleted successfully")
 				return 0;
-		return 1;
+			else:
+				print("Couldn't delete user")
+				return 1
