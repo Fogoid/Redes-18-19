@@ -9,27 +9,42 @@ def UDPConnections():
 	file.write('Tejo e fixe\n')
 	file.close()
 
+#General regex command matcher
+def CMDMatcher(msg, pattern):
+	matcher = re.compile(pattern)
+	if matcher.match(msg):
+		return 1
+	return 0
+
 
 #Checks if the user exists
 def checkUser(username,password):
 
 	file = open('utilizadores.txt','r')
-	for line in file.readline():
-		temporary = line.split(',')
+
+	for line in file.readlines():
+		temporary = line.split(' ')
 
 		if username == temporary[0]:
-			if password != temporary[1]:
+			if password != temporary[1].rstrip('\n'):
+				file.close()
 				return 'NOK'
+			file.close()
 			return 'OK'
+
+	file.close()
+	file = open('utilizadores.txt','ab+')	
+	package = username + ' ' + password + '\n'
+	file.write(package.encode())
+	file.close()
 	return 'NEW'
 
 #User authentication command
 def AUTCommand(message):
-	pattern = re.compile('^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$')
-
-	if pattern.match(message) != None:
+	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}$'):
 		return 1
 	return 0
+
 
 def DLUCommand(username,password):
 	return 0
