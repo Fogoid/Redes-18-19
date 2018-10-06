@@ -23,14 +23,13 @@ def authenticateUser(mySocket):
 
 	while True: 
 		userLogin = input()
-		print(userLogin.encode())
+		
 		if(CMDMatcher(userLogin,'^login\s[0-9]{5}\s[0-9 a-z]{8}$')):
 
 			(cmd, username, password) = userLogin.split(' ')
 
 			status = AUTCommand(mySocket, username, password)
 
-			print(status)
 			if status == 'OK\n':
 				print("User login successful")
 			elif status == 'NOK\n':
@@ -42,7 +41,7 @@ def authenticateUser(mySocket):
 			cmd = input()
 			return (username, password, 0, cmd)
 
-		elif userLogin == 'exit':
+		elif CMDMatcher(userLogin, '^exit$'):
 			return ("NNNNN", "NNNNNNNN", 1, "none")
 		else:
 			print("Please insert login XXXXX NNNNNNNN\nXXXXX - Your login 5 digit number\nNNNNNNNN - Your 8 character long password")
@@ -74,8 +73,9 @@ def LSDCommand(mySocket):
 	
 	msgSent = "LSD\n"
 	sendMessage(mySocket, msgSent)
-	msgRecv = recvMessage(mySocket).split(' ')
-
+	msgRecv = recvMessage(mySocket)
+	print(msgRecv)
+	msgRecv = msgRecv.split()
 	if CMDMatcher(msgRecv[0], '^LDR$'):
 		msg = "Safe directories: " + msgRecv[1] + "\n"
 		for direc in msgRecv[2:]:
@@ -92,7 +92,6 @@ def DLUCommand(mySocket):
 		sendMessage(mySocket,msgSent)
 		msgRecv = recvMessage(mySocket).split(' ')
 
-		print(msgRecv)
 		if CMDMatcher(msgRecv[0], "^DLR$"):
 			print(msgRecv[1], end="")
 			if CMDMatcher(msgRecv[1], "^OK\n$"):

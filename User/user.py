@@ -16,16 +16,24 @@ while not exit:
 
 	if loggedIn:
 		cmd = input()
+		cmd = cmd.split(' ')
 
 	#Creates a socket with a given protocol to establish a connection
 	mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	mySocket.connect((address, port))
 	
 	if not loggedIn:
+		mySocket.connect((address, port))
+		
 		(userName, userPassword, exit, cmd) = authenticateUser(mySocket)
 
 		loggedIn = 1
+
+		cmd = cmd.split(' ')
+	else:
+		if not (CMDMatcher(cmd[0], '^logout$') or CMDMatcher(cmd[0],'^exit$')):
+			mySocket.connect((address, port))
+			AUTCommand(mySocket, userName, userPassword)
 
 	if exit:
 		break
@@ -33,30 +41,22 @@ while not exit:
 	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
 	#Should delete user if there are no dictories stored in the BS server
 
-	cmd = cmd.split(' ')
-	
 	if CMDMatcher(cmd[0],'^deluser$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		loggedIn = DLUCommand(mySocket)
 
 	elif CMDMatcher(cmd[0],'^backup$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		print(' ', end="")
 
 	elif CMDMatcher(cmd[0],'^restore$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		print(' ', end="")
 
 	elif CMDMatcher(cmd[0],'^dirlist$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		LSDCommand(mySocket)
 
 	elif CMDMatcher(cmd[0],'^filelist$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		print(' ', end="")
 
 	elif CMDMatcher(cmd[0],'^delete$') and loggedIn:
-		AUTCommand(mySocket, userName, userPassword)
 		print(' ', end="")
 
 	elif CMDMatcher(cmd[0], '^logout$'):
@@ -65,4 +65,5 @@ while not exit:
 	elif CMDMatcher(cmd[0],'^exit$'):
 	 	exit = 1
 
-	mySocket.close()
+	if not (CMDMatcher(cmd[0], '^logout$') or CMDMatcher(cmd[0],'^exit$')):
+		mySocket.close()
