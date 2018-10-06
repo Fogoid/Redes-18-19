@@ -10,6 +10,7 @@ def UDPConnections():
 	file.close()
 
 
+#Checks if the user exists
 def checkUser(username,password):
 
 	file = open('utilizadores.txt','r')
@@ -22,9 +23,28 @@ def checkUser(username,password):
 			return 'OK'
 	return 'NEW'
 
-def AUTMatcher(message):
+#User authentication command
+def AUTCommand(message):
 	pattern = re.compile('^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$')
 
 	if pattern.match(message) != None:
 		return 1
+	return 0
+
+def DLUCommand(username,password):
+	return 0
+
+def BCKCommand(msgRecv):
+	return 0
+
+def RSTCommand(msgRecv):
+	return 0
+
+def LSDCommand(username,password):
+	return 0
+
+def LSFCommand(msgRecv):
+	return 0
+
+def DELCommand(msgRecv):
 	return 0

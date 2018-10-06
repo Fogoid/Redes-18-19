@@ -19,18 +19,32 @@ serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 while 1:
 	newPID = 1
-	serverSocket.bind(('localhost', 80))
+	serverSocket.bind((socket.gethostname(), 80))
 	serverSocket.listen(5)	
 	(clientSocket, address) = serverSocket.accept()
 	#os.fork()
 	#if newPID == 0:
 		#break
 
-msgRecv = mySocket.recv(buffersize)
-msgRecv = msgRecv.decode()
+while 1 :
+	msgRecv = mySocket.recv(buffersize)
+	msgRecv = msgRecv.decode()
 
-if AUTMatcher(msgRecv):
-	Username = msgRecv[4:9]
-	Password = msgRecv[10:18]
-	print(Username+' '+Password)
-	mySocket.send('AUR NEW')
+	if AUTCommand(msgRecv):
+		Username = msgRecv[4:9]
+		Password = msgRecv[10:18]
+		if checkUser(Username,Password) != 'NOK':
+			msgRecv = mySocket.recv(buffersize)
+			msgRecv = msgRecv.decode()
+			if msgRecv == 'DLU\n':
+				DLUCommand(Username,Password)
+			elif msgRecv[0:4] == 'BCK ':
+				BCKCommand(msgRecv)
+			elif msgRecv[0:4] == 'RST ':
+				RSTCommand(msgRecv)
+			elif msgRecv == 'LSD\n':
+				LSDCommand(Username,Password)
+			elif msgRecv[0:4] == 'LSF ':
+				LSFCommand(msgRecv)
+			elif msgRecv[0:4] == 'DEL ':
+				DELCommand(msgRecv)
