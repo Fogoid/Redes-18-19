@@ -25,11 +25,13 @@ while not exit:
 	if not loggedIn:
 		mySocket.connect((address, port))
 		
-		(userName, userPassword, exit, cmd) = authenticateUser(mySocket)
+		(userName, userPassword, exit) = authenticateUser(mySocket)
 
 		loggedIn = 1
 
-		cmd = cmd.split(' ')
+		mySocket.close()
+		continue
+		
 	else:
 		if not (CMDMatcher(cmd[0], '^logout$') or CMDMatcher(cmd[0],'^exit$')):
 			mySocket.connect((address, port))
@@ -41,23 +43,23 @@ while not exit:
 	#First login case in the User-CS protocol. Meant to login and introduce the pseudo "switch" case.
 	#Should delete user if there are no dictories stored in the BS server
 
-	if CMDMatcher(cmd[0],'^deluser$') and loggedIn:
+	if CMDMatcher(cmd[0],'^deluser$'):
 		loggedIn = DLUCommand(mySocket)
 
-	elif CMDMatcher(cmd[0],'^backup$') and loggedIn:
-		print(' ', end="")
+	elif CMDMatcher(cmd[0],'^backup$'):
+		BCKCommand(mySocket, cmd[1], userName, userPassword)
 
-	elif CMDMatcher(cmd[0],'^restore$') and loggedIn:
-		print(' ', end="")
+	elif CMDMatcher(cmd[0],'^restore$'):
+		RSTCommand(mySocket, cmd[1], userName, userPassword)
 
-	elif CMDMatcher(cmd[0],'^dirlist$') and loggedIn:
+	elif CMDMatcher(cmd[0],'^dirlist$'):
 		LSDCommand(mySocket)
 
-	elif CMDMatcher(cmd[0],'^filelist$') and loggedIn:
-		print(' ', end="")
+	elif CMDMatcher(cmd[0],'^filelist$'):
+		LSFCommand(mySocket, cmd[1], userName, userPassword)
 
-	elif CMDMatcher(cmd[0],'^delete$') and loggedIn:
-		print(' ', end="")
+	elif CMDMatcher(cmd[0],'^delete$'):
+		DELCommand(mySocket, cmd[1])
 
 	elif CMDMatcher(cmd[0], '^logout$'):
 		loggedIn = 0
