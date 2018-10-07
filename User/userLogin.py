@@ -1,4 +1,4 @@
-from userBaseFunctions import recvFixedMessage
+from userBaseFunctions import recvMessage
 from userBaseFunctions import CMDMatcher
 from userBaseFunctions import sendMessage
 import sys
@@ -39,7 +39,7 @@ def AUTCommand(mySocket, username, password):
 
 	sendMessage(mySocket, msgSent)
 	
-	autRecv = recvFixedMessage(mySocket).split(' ')
+	autRecv = recvMessage(mySocket, 0).split(' ')
 
 	if CMDMatcher(autRecv[0], "^AUR$"):
 		status = autRecv[1]

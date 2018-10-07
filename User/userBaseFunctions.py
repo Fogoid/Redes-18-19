@@ -23,19 +23,16 @@ def CMDMatcher(msg, pattern):
 def sendMessage(mySocket, msgSent):
 	mySocket.send(msgSent.encode())
 
-def recvMessage(mySocket):
-	msg = ''.encode()
-	
-	while True:
-		data = mySocket.recv(8)
-		if not data:
-			break
-		msg += data
-	
-	print((msg, "this was a received message"))
-	return msg
-
-def recvFixedMessage(mySocket):
-	msg = mySocket.recv(128).decode()
+def recvMessage(mySocket, n):
+	if n:
+		msg = ''.encode()
+		while True:
+			data = mySocket.recv(8)
+			if not data:
+				break
+			msg += data
+	else:
+		msg = mySocket.recv(128).decode()
+		
 	print((msg, "this was a received message"))
 	return msg

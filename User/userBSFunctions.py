@@ -12,7 +12,7 @@ def RSBCommand(mySocket, directory, username, password):
 	sendMessage(mySocket, msgSentBS)
 
 	rstRecv = b''
-	rstRecv = recvMessage(mySocket).split()
+	rstRecv = recvMessage(mySocket, 1).split()
 
 	if CMDMatcher(rstRecv[0], b'^RBR$'):
 		if CMDMatcher(rstRecv[1], b'^EOF$'):
@@ -28,3 +28,5 @@ def RSBCommand(mySocket, directory, username, password):
 				file.write(rstRecv[3*n+1])
 
 			print(directory + " restored successfully")
+
+ 

@@ -59,7 +59,7 @@ while not exit:
 		LSDCommand(mySocket)
 
 	elif CMDMatcher(cmd[0],'^filelist$'):
-		LSFCommand(mySocket, cmd[1], userName, userPassword)
+		LSFCommand(mySocket, cmd[1])
 
 	elif CMDMatcher(cmd[0],'^delete$'):
 		DELCommand(mySocket, cmd[1])
