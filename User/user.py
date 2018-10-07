@@ -3,9 +3,7 @@
 import sys 
 import socket
 import re
-from userBaseFunctions import getConnectionDetails
-from userBaseFunctions import CMDMatcher
-from userLogin import *
+from userBaseFunctions import *
 from userCSFuntions import *
 
 (addressName, port) = getConnectionDetails()
