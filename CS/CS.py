@@ -8,21 +8,20 @@ from CSFunctions import *
 Username = ''
 Password = ''
 buffersize = 256
-users = { '99999':'zzzzzzzz'}
+CSport = getConnectionDetails()
 
-#newPID = os.fork()
-#if newPID == 0:
-#	UDPConnections()
+newPID = os.fork()
+if newPID == 0:
+	UDPConnections(CSport)
 	
 
 #serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 #while 1:
-	#newPID = 1
 	#serverSocket.bind((socket.gethostname(), 80))
 	#serverSocket.listen(5)	
 	#(clientSocket, address) = serverSocket.accept()
-	#os.fork()
+	#newPID = os.fork()
 	#if newPID == 0:
 		#break
 

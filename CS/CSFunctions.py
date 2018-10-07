@@ -1,10 +1,30 @@
 #Piece of code responsible for constantly dealing with the
 #BS UDP connections
 import re
+import socket
+import sys
+import argparse
 
-def UDPConnections():
+def getConnectionDetails():
 
-	print('Eu existo e cenas, obrigado por tudo pai')
+	parser = argparse.ArgumentParser(description='Get connection details')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Gives the port the user will connect to')
+
+	connectionDetails = parser.parse_args()
+	print(connectionDetails.p)
+	return connectionDetails.p
+
+def UDPConnections(CSport):
+
+	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	BS_Server = ''
+	msgRecv =''
+
+	while 1:
+		(msgRecv, BS_Server) = CS_Socket.recvfrom(1024)
+		msgRecv.split(' ')
+		#FIX ME: DEFINE THE REST OF THE PROTOCOL
+
 	file = open('backupServers.txt','w')
 	file.write('Tejo e fixe\n')
 	file.close()

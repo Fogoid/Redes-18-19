@@ -51,12 +51,12 @@ while 1:
 	msgRecv.split(' ')
 
 	if CMDMatcher(msgRecv[0],'^LSF '):
-				LSFCommand()
+				LSFCommand(msgRecv,CS_Socket,address,port)
 
 	elif CMDMatcher(msgRecv[0],'^LSU '):
-				LSUCommand()
+				LSUCommand(msgRecv,CS_Socket,address,port)
 
 	elif CMDMatcher(msgRecv[0],'^DLB '):
-				DLBCommand()
+				DLBCommand(msgRecv,CS_Socket,address,port)
 	else:
 		SendError(CS_Socket,address,port)

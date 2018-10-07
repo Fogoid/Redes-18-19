@@ -42,11 +42,51 @@ def startBS(CS_Socket,address,port):
 			return 1
 	return 0
 
-def LSFCommand():
+def verifyUser(username,password):
+	file = open('users.txt','r')
+
+	for line in file.readlines():
+		temporary = line.split(' ')
+
+		if username == temporary[0]:
+			if password != temporary[1].rstrip('\n'):
+				file.close()
+				return 'NOK'
+			file.close()
+			return 'OK'
+	return 'NOK'
+
+def LSFCommand(msgRecv,CS_Socket,address,port):
 	return 0
 
-def LSUCommand():
+#Responsible for handling the server LSU request, CS server
+#requests a new user to be registered
+def LSUCommand(msgRecv,CS_Socket,address,port):
+	LUR_msg=''
+
+	if CMDMatcher(msgRecv[0]+msgRecv[1]+msgRecv[2], '^AUT\s[0-9]{5}\s[0-9 a-z]{8}$'):
+		file = open('users.txt','r')
+		for line in file.readlines():
+			temporary = line.split(' ')
+			if username == temporary[0]:
+				file.close()
+				LUR_msg='LUR NOK\n'
+				break
+
+		if(LUR_msg!='LUR NOK\n'):
+			file = open('users.txt','ab+')	
+			package = username + ' ' + password + '\n'
+			file.write(package.encode())
+			file.close()
+			LUR_msg ='LUR OK\n'
+
+	else:
+		LUR_msg ='LUR ERR\n'
+
+	CS_Socket.sendto(LUR_msg.encode(),(address,port))
 	return 0
 
-def DLBCommand():
+
+
+def DLBCommand(msgRecv,CS_Socket,address,port):
 	return 0
