@@ -68,7 +68,8 @@ def AUTCommand(message,User_Socket):
 		else:
 			with open(datafile,'w') as file:
 				file.write(password.encode())
-				AUT_msg = 'NEW\n'
+			os.makedirs('user_'+msgRecv[1])	
+			AUT_msg = 'NEW\n'
 	else:
 		AUT_msg = 'ERR\n'
 

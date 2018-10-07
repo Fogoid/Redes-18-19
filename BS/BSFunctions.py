@@ -22,6 +22,50 @@ def CMDMatcher(msg, pattern):
 		return 1
 	return 0
 
+#Simple function that puts the date in the right format
+def dateFormatter(date):
+	date = date.split(' ')
+	newDate = date[3] + '.' + str(strptime(date[1],'%b').tm_mon) + '.' + date[5] + ' ' + date[4]
+	return newDate
+
+#Function to get every file of directory and their descriptions, to promptly
+#send them to User
+def readDirectory(username,directory):
+
+	user_directory = "user_"+username
+	msg = ''
+
+	if os.path.exists(username_directory):
+			(dirpath,dirnames,files) = os.walk("./" + username_directory)
+			msg += str(len(files)) + ' '
+			if directory in dirnames:
+					for filename in files:
+						size = os.path.getsize(username+'/'+directory + '/' + filename)
+						date = dateFormatter(time.ctime(os.path.getmtime(username+'/'+directory + '/' + filename)))
+						msg += filename + ' ' + date + ' ' + str(size) + '\n'
+			else:
+				msg = 'ERR\n'	
+	else:
+		msg = 'ERR\n'
+	return msg
+
+
+def writeDirectory(message,username):
+	return_msg = ''
+	message = message.split()
+	directory = message[1]
+
+	if not os.path.exists('user_'+username+'/'+directory):
+		os.makedirs('user_'+username+'/'+directory)
+		for n in range(1, int(message[1].decode())+1):
+			file = open('user_'+username+'/'+directory + '/' + message[3*n-1].decode(), 'wb')
+			file.write(message[3*n+1])
+			print(directory + " restored successfully")
+		return_msg = 'OK\n'
+	else:
+		return_msg = 'NOK\n'
+	return return_msg
+
 
 #--------------------------------------------------
 # BS-User TCP Protocol Commands
@@ -57,13 +101,33 @@ def AUTCommand(User_Socket,message):
 		AUT_msg = 'AUR OK\n'
 	else:
 		AUT_msg = 'AUR NOK\n'
-	sendTCPMessage(User_Socket,message)
+	sendTCPMessage(User_Socket,AUT_msg)
 
 
-def UPLCommand():
+def UPLCommand(message,username,User_Socket):
+	UPR_msg = 'UPR '
+
+	if CMDMatcher(message, '^UPL\s[a-z]+[0-9]+\s'):
+		UPR_msg += writeDirectory(message,username)
+	else:
+		UPR_msg+='NOK\n'
+
+	sendTCPMessage(User_Socket,UPR_msg)
 	return 0
 
-def RSBCommand():
+def RSBCommand(message,username,User_Socket):
+	RBR_msg = 'RBR '
+
+	if CMDMatcher(message, '^RSB\s[a-z]+\n$'):
+		message = message.split(' ')
+		if os.path.exists('user_'+username):
+			RBR_msg += readDirectory(username,message[1])
+		else:
+			RBR_msg += 'EOF\n'
+	else:
+		RBR_msg += 'ERR\n'
+
+	sendTCPMessage(User_Socket,RBR_msg)
 	return 0
 
 #--------------------------------------------------
@@ -74,7 +138,7 @@ def RSBCommand():
 def sendUDPMessage(message,CS_Socket,address,port):
 	message = ''.join(message)
 	CS_Socket.sendto(LFD_msg.encode(),(address,port))
-
+	return 1
 
 #Function that registers the BS server on the CS through UDP
 def startBS(CS_Socket,address,port):
@@ -96,20 +160,9 @@ def startBS(CS_Socket,address,port):
 
 #Responsible for handling the LSF request
 def LSFCommand(msgRecv,CS_Socket,address,port):
+	LFD_msg = 'LFD '
 	directory = msgRecv[2].rstrip('\n')
-	LFD_msg = ''
-
-	if os.path.exists(msgRecv[1]):
-		(dirpath,dirnames,files) = os.walk("./" + msgRecv[1])
-		if directory in dirnames:
-				for filename in files:
-					size = os.path.getsize(msgRecv[1]+'/'+directory + '/' + filename)
-					date = dateFormatter(time.ctime(os.path.getmtime(msgRecv[1]+'/'+directory + '/' + filename)))
-					LFD_msg += filename + ' ' + date + ' ' + str(size) + '\n'
-		else:
-			LFD_msg = 'ERR\n'	
-	else:
-			LFD_msg = 'ERR\n'	
+	LFD_msg += readDirectory(msgRecv[1],directory)
 
 	sendUDPMessage(LFD_msg,CS_Socket,address,port)
 	return 0
@@ -117,16 +170,17 @@ def LSFCommand(msgRecv,CS_Socket,address,port):
 #Responsible for handling the server LSU request, CS server
 #requests a new user to be registered
 def LSUCommand(msgRecv,CS_Socket,address,port):
-	LUR_msg=''
+	LUR_msg='LUR '
 	filename='user_'+msgRecv[1]+'.txt'
 
 	if CMDMatcher(msgRecv[0]+msgRecv[1]+msgRecv[2], '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
 		if not os.path.exists(filename):
 			with open(filename) as file:
 				file.write(msgRecv[2].rstrip('\n').encode()) 
-			os.makedirs(msgRecv[1])
+			os.makedirs('user_'+msgRecv[1])
+			LUR_msg += 'OK\n'
 		else:
-			LUR_msg = 'NOK\n'
+			LUR_msg += 'NOK\n'
 	else:
 		LUR_msg ='ERR\n'
 
@@ -137,17 +191,18 @@ def LSUCommand(msgRecv,CS_Socket,address,port):
 
 #Responsible for handling the DLB request from the CS server
 def DLBCommand(msgRecv,CS_Socket,address,port):
-	DBR_msg = ''
+	DBR_msg = 'DBR '
+	user_directory = 'user_' + msgRecv[1]
 
-	if os.path.exists(msgRecv[1]):
+	if os.path.exists(user_directory):
 		directory = msgRecv[2].rstrip('\n')
-		if os.path.exists(msgRecv[1]+'/'+directory):
-			shutil.rmtree(msgRecv[1]+'/'+directory,ignore_errors=True)
-			DBR_msg = 'OK\n'
+		if os.path.exists(user_directory+'/'+directory):
+			shutil.rmtree(user_directory+'/'+directory,ignore_errors=True)
+			DBR_msg += 'OK\n'
 		else:
-			DBR_msg = 'NOK\n'
+			DBR_msg += 'NOK\n'
 	else:
-		DBR_msg = 'NOK\n'
+		DBR_msg += 'NOK\n'
 
 	sendUDPMessage(DLB_msg,CS_Socket,address,port)
 	return 0
