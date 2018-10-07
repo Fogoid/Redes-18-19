@@ -2,6 +2,7 @@ import socket
 import sys
 import argparse
 import re
+from shutil import rmtree
 
 def getConnectionDetails():
 
@@ -21,11 +22,61 @@ def CMDMatcher(msg, pattern):
 		return 1
 	return 0
 
-def SendError(CS_Socket,address,port):
-	error_msg = 'ERR'
-	CS_Socket.sendto(error_msg.encode(),(address,port))
+
+#--------------------------------------------------
+# BS-User TCP Protocol Commands
+#--------------------------------------------------
+
+#Simple function that sends the specified message through TCP
+def sendTCPMessage(User_Socket, msg):
+	User_Socket.send(msg.encode())
+
+#Sends a 'ERR' message
+def sendTCPError(User_Socket,msg):
+	sendTCPMessage(User_Socket,'ERR\n')
+
+#Checks if the given user is valid and is loaded in the BS server's users.txt list
+def verifyUser(message):
+
+	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
+		message = message.split(' ')
+		user = message[1]
+		password = message[2].rstrip('\n')
+
+		if os.path.exists(user+'.txt'):
+			with open(user+'.txt') as file:
+				if file.readline() == password:
+					return 1
+	return 0
 
 
+#User TCP authentication command
+def AUTCommand(User_Socket,message):
+	AUT_msg = ''
+	if verifyUser(message):
+		AUT_msg = 'AUR OK\n'
+	else:
+		AUT_msg = 'AUR NOK\n'
+	sendTCPMessage(User_Socket,message)
+
+
+def UPLCommand():
+	return 0
+
+def RSBCommand():
+	return 0
+
+#--------------------------------------------------
+# BS-CS UDP Protocol Commands
+#--------------------------------------------------
+
+#Simple function that sends a UDP message
+def sendUDPMessage(message,CS_Socket,address,port):
+	message = ''.join(message)
+	CS_Socket.sendto(LFD_msg.encode(),(address,port))
+
+
+#Function that registers the BS server on the CS through UDP
 def startBS(CS_Socket,address,port):
 
 	register = 'REG '+address+' '+str(port)+'\n'
@@ -42,51 +93,61 @@ def startBS(CS_Socket,address,port):
 			return 1
 	return 0
 
-def verifyUser(username,password):
-	file = open('users.txt','r')
 
-	for line in file.readlines():
-		temporary = line.split(' ')
-
-		if username == temporary[0]:
-			if password != temporary[1].rstrip('\n'):
-				file.close()
-				return 'NOK'
-			file.close()
-			return 'OK'
-	return 'NOK'
-
+#Responsible for handling the LSF request
 def LSFCommand(msgRecv,CS_Socket,address,port):
+	directory = msgRecv[2].rstrip('\n')
+	LFD_msg = ''
+
+	if os.path.exists(msgRecv[1]):
+		(dirpath,dirnames,files) = os.walk("./" + msgRecv[1])
+		if directory in dirnames:
+				for filename in files:
+					size = os.path.getsize(msgRecv[1]+'/'+directory + '/' + filename)
+					date = dateFormatter(time.ctime(os.path.getmtime(msgRecv[1]+'/'+directory + '/' + filename)))
+					LFD_msg += filename + ' ' + date + ' ' + str(size) + '\n'
+		else:
+			LFD_msg = 'ERR\n'	
+	else:
+			LFD_msg = 'ERR\n'	
+
+	sendUDPMessage(LFD_msg,CS_Socket,address,port)
 	return 0
 
 #Responsible for handling the server LSU request, CS server
 #requests a new user to be registered
 def LSUCommand(msgRecv,CS_Socket,address,port):
 	LUR_msg=''
+	filename='user_'+msgRecv[1]+'.txt'
 
-	if CMDMatcher(msgRecv[0]+msgRecv[1]+msgRecv[2], '^AUT\s[0-9]{5}\s[0-9 a-z]{8}$'):
-		file = open('users.txt','r')
-		for line in file.readlines():
-			temporary = line.split(' ')
-			if username == temporary[0]:
-				file.close()
-				LUR_msg='LUR NOK\n'
-				break
-
-		if(LUR_msg!='LUR NOK\n'):
-			file = open('users.txt','ab+')	
-			package = username + ' ' + password + '\n'
-			file.write(package.encode())
-			file.close()
-			LUR_msg ='LUR OK\n'
-
+	if CMDMatcher(msgRecv[0]+msgRecv[1]+msgRecv[2], '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
+		if not os.path.exists(filename):
+			with open(filename) as file:
+				file.write(msgRecv[2].rstrip('\n').encode()) 
+			os.makedirs(msgRecv[1])
+		else:
+			LUR_msg = 'NOK\n'
 	else:
-		LUR_msg ='LUR ERR\n'
+		LUR_msg ='ERR\n'
 
-	CS_Socket.sendto(LUR_msg.encode(),(address,port))
+	sendUDPMessage(LUR_msg,CS_Socket,address,port)
 	return 0
 
 
 
+#Responsible for handling the DLB request from the CS server
 def DLBCommand(msgRecv,CS_Socket,address,port):
+	DBR_msg = ''
+
+	if os.path.exists(msgRecv[1]):
+		directory = msgRecv[2].rstrip('\n')
+		if os.path.exists(msgRecv[1]+'/'+directory):
+			shutil.rmtree(msgRecv[1]+'/'+directory,ignore_errors=True)
+			DBR_msg = 'OK\n'
+		else:
+			DBR_msg = 'NOK\n'
+	else:
+		DBR_msg = 'NOK\n'
+
+	sendUDPMessage(DLB_msg,CS_Socket,address,port)
 	return 0

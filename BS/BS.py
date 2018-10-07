@@ -5,23 +5,36 @@ import os
 import signal
 from BSFunctions import *
 
-(addressName, port) = getConnectionDetails()
-
-address = socket.gethostbyname(addressName)
-
 
 #This part will be responsible for the user TCP protocol implementation
-#while 1:
-	#os.fork()
-	#newPID = 1
-	#if newPID == 0:
-		#break
-	#serverSocket.bind((socket.gethostname(), 80))
-	#serverSocket.listen(5)	
-	#(clientSocket, address) = serverSocket.accept()
+newPID = os.fork()
+buffersize = 256
+
+User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+while newPID!=0:
+	User_Socket.bind((socket.gethostname(), 80))
+	User_Socket.listen(5)	
+	(clientSocket, User_address) = User_Socket.accept()
+
+	msgRecv = mySocket.recv(buffersize).decode()
+
+	if AUTCommand(msgRecv):
+		msgRecv = msgRecv.split(' ')
+
+		if CMDMatcher(msgRecv[0],'^UPL$'):
+				UPLCommand(msgRecv,CS_Socket,address,port)
+
+		elif CMDMatcher(msgRecv[0],'^RSB$'):
+				RSBCommand(msgRecv,CS_Socket,address,port)
+		else:
+			sendUDPError(CS_Socket,address,port)
+
 	
 
 
+(addressName, port) = getConnectionDetails()
+address = socket.gethostbyname(addressName)
 CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 startBS(CS_Socket,address,port)
 
@@ -50,13 +63,13 @@ while 1:
 	msgRecv = msgRecv.decode()
 	msgRecv.split(' ')
 
-	if CMDMatcher(msgRecv[0],'^LSF '):
+	if CMDMatcher(msgRecv[0],'^LSF$'):
 				LSFCommand(msgRecv,CS_Socket,address,port)
 
-	elif CMDMatcher(msgRecv[0],'^LSU '):
+	elif CMDMatcher(msgRecv[0],'^LSU$'):
 				LSUCommand(msgRecv,CS_Socket,address,port)
 
-	elif CMDMatcher(msgRecv[0],'^DLB '):
+	elif CMDMatcher(msgRecv[0],'^DLB$'):
 				DLBCommand(msgRecv,CS_Socket,address,port)
 	else:
-		SendError(CS_Socket,address,port)
+		sendUDPError(CS_Socket,address,port)
