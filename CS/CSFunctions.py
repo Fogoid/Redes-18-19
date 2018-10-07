@@ -14,6 +14,15 @@ def getConnectionDetails():
 	print(connectionDetails.p)
 	return connectionDetails.p
 
+#General regex command matcher
+def CMDMatcher(msg, pattern):
+	matcher = re.compile(pattern)
+	if matcher.match(msg):
+		return 1
+	return 0
+
+
+#Cicle that keeps waiting for new BS's to register
 def UDPConnections(CSport):
 
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -21,20 +30,18 @@ def UDPConnections(CSport):
 	msgRecv =''
 
 	while 1:
-		(msgRecv, BS_Server) = CS_Socket.recvfrom(1024)
+		(msgRecv, BS_Server) = CS_Socket.recvfrom(1024).decode()
 		msgRecv.split(' ')
-		#FIX ME: DEFINE THE REST OF THE PROTOCOL
-
-	file = open('backupServers.txt','w')
-	file.write('Tejo e fixe\n')
-	file.close()
-
-#General regex command matcher
-def CMDMatcher(msg, pattern):
-	matcher = re.compile(pattern)
-	if matcher.match(msg):
-		return 1
+		RGR_msg = ''
+		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
+			file = open('backupServers.txt','ab+')
+			file.write((msgRecv[1] + msgRecv[2].rstrip('\n')).encode())
+			file.close()
+			CS_Socket.sendto('OK\n'.encode(),(msgRecv[1],msgRecv[2].rstrip('\n')))
+		else:
+			CS_Socket.sendto('RGR ERR\n'.encode(),(msgRecv[1],msgRecv[2].rstrip('\n')))
 	return 0
+
 
 
 #Checks if the user exists
