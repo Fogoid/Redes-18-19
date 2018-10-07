@@ -3,7 +3,10 @@
 import sys 
 import socket
 import re
-from userFunctions import *
+from userBaseFunctions import getConnectionDetails
+from userBaseFunctions import CMDMatcher
+from userLogin import *
+from userCSFuntions import *
 
 (addressName, port) = getConnectionDetails()
 
@@ -56,7 +59,7 @@ while not exit:
 		LSDCommand(mySocket)
 
 	elif CMDMatcher(cmd[0],'^filelist$'):
-		LSFCommand(mySocket, cmd[1], userName, userPassword)
+		LSFCommand(mySocket, cmd[1])
 
 	elif CMDMatcher(cmd[0],'^delete$'):
 		DELCommand(mySocket, cmd[1])
