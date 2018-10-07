@@ -2,7 +2,6 @@ import os
 import sys
 import socket
 from userBaseFunctions import *
-from userLogin import AUTCommand
 
 def RSBCommand(mySocket, directory, username, password):
 	
