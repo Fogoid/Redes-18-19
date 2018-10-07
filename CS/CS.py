@@ -37,7 +37,7 @@ while 1 :
 		Password = msgRecv[2]
 
 		#msgRecv = User_Socket.recv(buffersize)
-		#msgRecv = msgRecv.decode()
+		#msgRecv = msgRecv.decode().split(' ')
 
 		if CMDMatcher(msgRecv[0],'^DLU\n$'):
 				DLUCommand(User_Socket,Username)
@@ -46,7 +46,7 @@ while 1 :
 				BCKCommand(msgRecv)
 
 		elif CMDMatcher(msgRecv[0],'^RST$'):
-				RSTCommand(msgRecv)
+				RSTCommand(msgRecv,Username,User_Socket)
 
 		elif CMDMatcher(msgRecv[0],'^LSD\n$'):
 				LSDCommand(Username,Password)
@@ -55,7 +55,7 @@ while 1 :
 				LSFCommand(msgRecv)
 
 		elif CMDMatcher(msgRecv[0],'^DEL$'):
-				DELCommand(msgRecv)
+				DELCommand(msgRecv,Username,User_Socket)
 
 		else:
 			sendTCPMessage('ERR\n',User_Socket)

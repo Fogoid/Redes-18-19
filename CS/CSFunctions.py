@@ -4,6 +4,7 @@ import re
 import socket
 import sys
 import argparse
+from shutil import rmtree
 
 def getConnectionDetails():
 
@@ -94,7 +95,19 @@ def DLUCommand(serverSocket,username):
 def BCKCommand(msgRecv):
 	return 0
 
-def RSTCommand(msgRecv):
+def RSTCommand(msgRecv,username,User_Socket):
+
+	RSR_msg ='RSR '
+	if CMDMatcher(msgRecv, '^RST\s[a-z]+\n$'):
+		msgRecv=msgRecv.split(' ')
+		if os.path.exists('user_'+username+'/'+msgRecv[1]):
+			with open('user_'+username+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
+				 RSR_msg += file.readline()+'\n'
+		else:
+			RSR_msg += 'EOF\n'
+	else:
+		RSR_msg='ERR\n'
+	sendTCPMessage(User_Socket,RSR_msg)
 	return 0
 
 def LSDCommand(username,password):
@@ -103,5 +116,23 @@ def LSDCommand(username,password):
 def LSFCommand(msgRecv):
 	return 0
 
-def DELCommand(msgRecv):
+def DELCommand(msgRecv,username,User_Socket):
+	DDR_msg = 'DDR '
+	BS_Server = []
+
+	if CMDMatcher(msgRecv, '^DEL\s[a-z]+\n$'):
+		msgRecv=msgRecv.split(' ')
+		if os.path.exists('user_'+username+'/'+msgRecv[1]):
+			with open('user_'+username+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
+				bs_data = file.readline().split(' ')
+				BS_Server.append(bs_data[0])
+				BS_Server.append(bs_data[1])
+			#FIX ME : SEND BS SERVER INSTRUCTION TO DESTROY DIR
+			shutil.rmtree('user_'+username+'/'+msgRecv[1],ignore_errors=True)
+			DDR_msg += 'OK\n'
+		else:
+			DDR_msg += 'NOK\n'
+	else:
+		DDR_msg='ERR\n'
+	sendTCPMessage(User_Socket,DDR_msg)
 	return 0
