@@ -22,7 +22,7 @@ buffersize = 256
 # ----------------------------------------------------------------------------------
 while newPID!=0:
 	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	User_Socket.bind((socket.gethostname(), 80))
+	User_Socket.bind((socket.gethostname(), 58011))
 	User_Socket.listen(5)	
 	(clientSocket, User_address) = User_Socket.accept()
 

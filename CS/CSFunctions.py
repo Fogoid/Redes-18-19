@@ -9,7 +9,7 @@ from shutil import rmtree
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details')
-	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Gives the port the user will connect to')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Gives the port the user will connect to')
 
 	connectionDetails = parser.parse_args()
 	print(connectionDetails.p)
@@ -107,28 +107,61 @@ def RSTCommand(msgRecv,username,User_Socket):
 			RSR_msg += 'EOF\n'
 	else:
 		RSR_msg='ERR\n'
+
 	sendTCPMessage(User_Socket,RSR_msg)
 	return 0
 
-def LSDCommand(username,password):
+def LSDCommand(username,User_Socket):
+
+	LDR_msg ='LDR '
+	username_directory = "user_"+username
+
+	if os.path.exists(username_directory):
+		(dirpath,dirnames,files) = os.walk("./" + username_directory)
+		LDR_msg += str(len(dirnames))+' '
+		for name in dirnames:
+			LDR_msg = name+'\n'
+
+	sendTCPMessage(User_Socket,LDR_msg)
 	return 0
 
-def LSFCommand(msgRecv):
+def LSFCommand(msgRecv,username,User_Socket):
+	LFD_msg='LFD '
+	username_directory = "user_"+username
+
+
+	if CMDMatcher(msgRecv, '^LSF\s[a-z]+\n$'):
+		msgRecv=msgRecv.split(' ')
+		msgRecv[1] = msgRecv[1].rstrip('\n')
+		if os.path.exists(username_directory+'/'+msgRecv[1]):
+			with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
+				bs_data = file.readline().split(' ')
+				BS_Server.append(bs_data[0])
+				BS_Server.append(bs_data[1])
+			LFD_msg += BS_Server[0]+' '
+			LFD_msg += BS_Server[1]+' '
+	else:
+		LFD_msg='ERR\n'
+
+	sendTCPMessage(User_Socket,LFD_msg)
 	return 0
 
 def DELCommand(msgRecv,username,User_Socket):
 	DDR_msg = 'DDR '
+	username_directory = "user_"+username
 	BS_Server = []
+
 
 	if CMDMatcher(msgRecv, '^DEL\s[a-z]+\n$'):
 		msgRecv=msgRecv.split(' ')
-		if os.path.exists('user_'+username+'/'+msgRecv[1]):
-			with open('user_'+username+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
+		msgRecv[1] = msgRecv[1].rstrip('\n')
+		if os.path.exists(username_directory+'/'+msgRecv[1]):
+			with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
 				bs_data = file.readline().split(' ')
 				BS_Server.append(bs_data[0])
 				BS_Server.append(bs_data[1])
 			#FIX ME : SEND BS SERVER INSTRUCTION TO DESTROY DIR
-			shutil.rmtree('user_'+username+'/'+msgRecv[1],ignore_errors=True)
+			shutil.rmtree(username_directory+'/'+msgRecv[1],ignore_errors=True)
 			DDR_msg += 'OK\n'
 		else:
 			DDR_msg += 'NOK\n'

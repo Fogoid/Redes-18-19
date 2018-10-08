@@ -9,26 +9,23 @@ Username = ''
 Password = ''
 buffersize = 256
 CSport = getConnectionDetails()
-
+address = socket.gethostbyname('localhost')
 newPID = os.fork()
 if newPID == 0:
 	UDPConnections(CSport)
 	
-
-#User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 #while 1:
-	#User_Socket.bind((socket.gethostname(), 80))
-	#User_Socket.listen(5)	
-	#(clientSocket, address) = User_Socket.accept()
 	#newPID = os.fork()
 	#if newPID == 0:
 		#break
 
 while 1 :
-	#msgRecv = User_Socket.recv(buffersize)
-	#msgRecv = msgRecv.decode()
-	msgRecv = input("First After While Input\n")
+	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	User_Socket.bind((address, CSport))
+	User_Socket.listen(5)	
+	(clientSocket, client_address) = User_Socket.accept()
+	msgRecv = User_Socket.recv(buffersize)
+	msgRecv = msgRecv.decode()
 
 	if AUTCommand(msgRecv,User_Socket):
 
@@ -49,13 +46,14 @@ while 1 :
 				RSTCommand(msgRecv,Username,User_Socket)
 
 		elif CMDMatcher(msgRecv[0],'^LSD\n$'):
-				LSDCommand(Username,Password)
+				LSDCommand(Username,User_Socket)
 
 		elif CMDMatcher(msgRecv[0],'^LSF$'):
-				LSFCommand(msgRecv)
+				LSFCommand(msgRecv,Username,User_Socket)
 
 		elif CMDMatcher(msgRecv[0],'^DEL$'):
 				DELCommand(msgRecv,Username,User_Socket)
 
 		else:
 			sendTCPMessage('ERR\n',User_Socket)
+	User_Socket.close()	

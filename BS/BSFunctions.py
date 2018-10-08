@@ -7,9 +7,9 @@ from shutil import rmtree
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
-	parser.add_argument('-b', metavar='BSport', type=int, default=59000, help='Well-know available port for the CS and user to connect to')
+	parser.add_argument('-b', metavar='BSport', type=int, default=58011, help='Well-know available port for the CS and user to connect to')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Name of the CS where the BS will connect to')
-	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Port from CS where the BS will connect to')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Port from CS where the BS will connect to')
 
 	connectionDetails = parser.parse_args()
 	print((connectionDetails.n,connectionDetails.p))
@@ -32,7 +32,7 @@ def dateFormatter(date):
 #send them to User
 def readDirectory(username,directory):
 
-	user_directory = "user_"+username
+	username_directory = "user_"+username
 	msg = ''
 
 	if os.path.exists(username_directory):
