@@ -6,10 +6,10 @@ import signal
 from BSFunctions import *
 
 #Starting the UDP socket to register in the CS
-(addressName, port) = getConnectionDetails()
+(BSport, addressName, CSport) = getConnectionDetails()
 address = socket.gethostbyname(addressName)
 CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-startBS(CS_Socket,address,port)
+startBS(CS_Socket,address,CSport)
 
 #This part will be responsible for the user TCP protocol implementation
 newPID = os.fork()
@@ -19,30 +19,30 @@ buffersize = 256
 
 # ----------------------------------------------------------------------------------
 # BS-User TCP requests while cicle
-# ----------------------------------------------------------------------------------
-while newPID!=0:
-	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	User_Socket.bind((socket.gethostname(), 58011))
-	User_Socket.listen(5)	
-	(clientSocket, User_address) = User_Socket.accept()
-
-	msgRecv = mySocket.recv(buffersize).decode()
-
-	if AUTCommand(msgRecv):
-		msgRecv = msgRecv.split(' ')
-		username = msgRecv[1]
-
-		msgRecv = mySocket.recv(buffersize).decode()
-
-		if CMDMatcher(msgRecv[0],'^UPL$'):
-				UPLCommand(msgRecv,User_Socket)
-
-		elif CMDMatcher(msgRecv[0],'^RSB$'):
-				RSBCommand(msgRecv,username,User_Socket)
-		else:
-			sendTCPError(CS_Socket,address,port)
-	User_Socket.close()
-
+## ----------------------------------------------------------------------------------
+#while newPID!=0:
+#	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#	User_Socket.bind((address, 58011))
+#	User_Socket.listen(5)	
+#	(clientSocket, User_address) = User_Socket.accept()
+#
+#	msgRecv = mySocket.recv(buffersize).decode()
+#
+#	if AUTCommand(msgRecv):
+#		msgRecv = msgRecv.split(' ')
+#		username = msgRecv[1]
+#
+#		msgRecv = mySocket.recv(buffersize).decode()
+#
+#		if CMDMatcher(msgRecv[0],'^UPL$'):
+#				UPLCommand(msgRecv,User_Socket)
+#
+#		elif CMDMatcher(msgRecv[0],'^RSB$'):
+#				RSBCommand(msgRecv,username,User_Socket)
+#		else:
+#			sendTCPError(CS_Socket,address,port)
+#	User_Socket.close()
+#
 	
 
 

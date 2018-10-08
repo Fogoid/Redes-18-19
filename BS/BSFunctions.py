@@ -7,13 +7,13 @@ from shutil import rmtree
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
-	parser.add_argument('-b', metavar='BSport', type=int, default=58011, help='Well-know available port for the CS and user to connect to')
+	parser.add_argument('-b', metavar='BSport', type=int, default=59000, help='Well-know available port for the CS and user to connect to')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Name of the CS where the BS will connect to')
 	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Port from CS where the BS will connect to')
 
 	connectionDetails = parser.parse_args()
-	print((connectionDetails.n,connectionDetails.p))
-	return (connectionDetails.n, connectionDetails.p)
+	print((connectionDetails.b,connectionDetails.n,connectionDetails.p))
+	return (connectionDetails.b,connectionDetails.n, connectionDetails.p)
 
 #General regex command matcher
 def CMDMatcher(msg, pattern):
@@ -148,6 +148,7 @@ def startBS(CS_Socket,address,port):
 	centralServer = ''
 
 	while 1:
+		print("startBS while")
 		CS_Socket.sendto(register.encode(),(address,port))
 		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
 		msgRecv = msgRecv.decode()

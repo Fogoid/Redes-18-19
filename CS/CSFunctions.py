@@ -5,7 +5,7 @@ import socket
 import sys
 import argparse
 import os
-from shutil import rmtree
+import shutil 
 
 def getConnectionDetails():
 
@@ -28,31 +28,37 @@ def sendTCPMessage(msg,User_Socket):
 	User_Socket.send(msg.encode())
 
 #Cicle that keeps waiting for new BS's to register
-def UDPConnections(CSport):
+def UDPConnections(address,CSport):
 
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	BS_Socket.bind((address, CSport))
 	BS_Server = ''
 	msgRecv =''
 
-	while 1:
-		(msgRecv, BS_Server) = BS_Socket.recvfrom(1024).decode()
-		msgRecv.split(' ')
-		RGR_msg = ''
-		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
-			file = open('backupServers.txt','ab+')
-			file.write((msgRecv[1] + msgRecv[2].rstrip('\n')).encode())
-			file.close()
-			Bs_Socket.sendto('OK\n'.encode(),(msgRecv[1],msgRecv[2].rstrip('\n')))
-		else:
-			BS_Socket.sendto('RGR ERR\n'.encode(),(msgRecv[1],msgRecv[2].rstrip('\n')))
+	#while 1:
+	print("UDPConnections while")
+	(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
+	msgRecv = msgRecv.decode().split(' ')
+	print(msgRecv)
+	RGR_msg = 'RGR '
+	if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
+		file = open('backupServers.txt','ab+')
+		file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
+		file.close()
+		RGR_msg+='OK\n'
+	else:
+		RGR_msg+='NOK\n'
+	BS_Socket.sendto(RGR_msg.encode(),(msgRecv[1],int(msgRecv[2].rstrip('\n'))))
+	BS_Socket.close()
 	return 0
 
 
 
 #Function that eliminates the user from the list of users
 def removeUser(username):
-	os.remove("user_"+username+'.txt')
-	shutil.rmtree(username,ignore_errors=True)
+	os.remove('user_'+username+'.txt')
+	shutil.rmtree('user_'+username,ignore_errors=True)
 	return 1
 
 #User authentication command
@@ -86,12 +92,14 @@ def AUTCommand(message,User_Socket):
 def DLUCommand(serverSocket,username):
 	DLR_msg = 'DLR '
 
-	filename = username+'.txt'
-	if os.path.exists(filename):
-		if os.stat(filename).st_size == 0:
-			os.remove(filename)
-			removeUser(username)
-			DLR_msg +='OK\n'
+	username_directory = 'user_'+username
+
+	if os.path.exists(username_directory):
+		for dirpath, dirnames, files in os.walk("./" + username_directory):
+			if(len(dirnames)==0):
+				removeUser(username)
+				DLR_msg +='OK\n'
+				break
 	else:
 		DLR_msg +='NOK\n'
 
