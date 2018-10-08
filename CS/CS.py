@@ -20,11 +20,11 @@ if newPID == 0:
 		#break
 
 while 1 :
-	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	User_Socket.bind((address, CSport))
-	User_Socket.listen(5)	
-	(clientSocket, client_address) = User_Socket.accept()
-	msgRecv = User_Socket.recv(buffersize)
+	Server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	Server_Socket.bind((address, CSport))
+	Server_Socket.listen(2)	
+	(User_Socket, client_address) = Server_Socket.accept()
+	msgRecv = User_Socket.recv(128)
 	msgRecv = msgRecv.decode()
 
 	if AUTCommand(msgRecv,User_Socket):
@@ -33,8 +33,8 @@ while 1 :
 		Username = msgRecv[1]
 		Password = msgRecv[2]
 
-		#msgRecv = User_Socket.recv(buffersize)
-		#msgRecv = msgRecv.decode().split(' ')
+		msgRecv = User_Socket.recv(buffersize)
+		msgRecv = msgRecv.decode().split(' ')
 
 		if CMDMatcher(msgRecv[0],'^DLU\n$'):
 				DLUCommand(User_Socket,Username)

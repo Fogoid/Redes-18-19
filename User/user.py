@@ -8,7 +8,7 @@ from userCSFuntions import *
 
 (addressName, port) = getConnectionDetails()
 
-address = socket.gethostbyname("tejo.tecnico.ulisboa.pt")
+address = socket.gethostbyname(addressName)
 
 exit = 0
 loggedIn = 0

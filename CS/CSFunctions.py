@@ -4,6 +4,7 @@ import re
 import socket
 import sys
 import argparse
+import os
 from shutil import rmtree
 
 def getConnectionDetails():
@@ -60,6 +61,7 @@ def AUTCommand(message,User_Socket):
 	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}$'):
 		message = message.split(' ')
 		datafile = 'user_'+message[1] + '.txt'
+		password = message[2].rstrip('\n')
 		if os.path.exists(datafile):
 			with open(datafile,'r') as file:
 				if file.readline().rstrip('\n') == password.rstrip('\n'):
@@ -68,8 +70,8 @@ def AUTCommand(message,User_Socket):
 					AUT_msg = 'NOK\n'
 		else:
 			with open(datafile,'w') as file:
-				file.write(password.encode())
-			os.makedirs('user_'+msgRecv[1])	
+				file.write(password)
+			os.makedirs('user_'+message[1])	
 			AUT_msg = 'NEW\n'
 	else:
 		AUT_msg = 'ERR\n'
@@ -82,14 +84,18 @@ def AUTCommand(message,User_Socket):
 
 
 def DLUCommand(serverSocket,username):
+	DLR_msg = 'DLR '
+
 	filename = username+'.txt'
 	if os.path.exists(filename):
 		if os.stat(filename).st_size == 0:
 			os.remove(filename)
 			removeUser(username)
-			sendTCPMessage(serverSocket,'OK\n')
-			return 1
-	sendTCPMessage(serverSocket,'NOK\n')
+			DLR_msg +='OK\n'
+	else:
+		DLR_msg +='NOK\n'
+
+	sendTCPMessage(DLR_msg,serverSocket)
 	return 0
 
 def BCKCommand(msgRecv):
@@ -114,15 +120,18 @@ def RSTCommand(msgRecv,username,User_Socket):
 def LSDCommand(username,User_Socket):
 
 	LDR_msg ='LDR '
+	dirnameList = ''
 	username_directory = "user_"+username
+	n = 0
 
 	if os.path.exists(username_directory):
-		(dirpath,dirnames,files) = os.walk("./" + username_directory)
-		LDR_msg += str(len(dirnames))+' '
-		for name in dirnames:
-			LDR_msg = name+'\n'
+		for dirpath, dirnames, files in os.walk("./" + username_directory):
+			for name in dirnames:
+				n += 1
+				dirnameList += name+' '
 
-	sendTCPMessage(User_Socket,LDR_msg)
+	LDR_msg += str(n) + ' ' + dirnameList + '\n'
+	sendTCPMessage(LDR_msg,User_Socket)
 	return 0
 
 def LSFCommand(msgRecv,username,User_Socket):

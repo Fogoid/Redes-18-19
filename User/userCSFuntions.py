@@ -57,11 +57,12 @@ def BCKCommand(mySocket, directory, username, password): #finish me later
 	filenames = []
 	msgSent = "BCK " + directory + ' '
 
-	for dirpath, dirnames, files in os.walk("./" + dir):
+	for dirpath, dirnames, files in os.walk("./" + directory):
 		for filename in files:
 			filenames += [filename]
 			size = os.path.getsize(directory + '/' + filename)
-			date = time.ctime(os.path.getmtime(directory + '/' + filename))
+			date = dateFormatter(time.ctime(os.path.getmtime(directory + '/' + filename)))
+			print(date)
 			msgSent += filename + ' ' + date + ' ' + str(size) + '\n'
 
 	print(msgSent)

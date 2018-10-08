@@ -11,8 +11,8 @@ def RSBCommand(mySocket, directory, username, password):
 	sendMessage(mySocket, msgSentBS)
 
 	rstRecv = b''
-	rstRecv = recvMessage(mySocket, 1).split()
-
+	rstRecv = recvMessage(mySocket, 1).split(b' ')
+	
 	if CMDMatcher(rstRecv[0], b'^RBR$'):
 		if CMDMatcher(rstRecv[1], b'^EOF$'):
 			print("No directory found")
@@ -22,10 +22,29 @@ def RSBCommand(mySocket, directory, username, password):
 			if not os.path.exists(directory):
 				os.makedirs(directory)
 			msg = 'Number of files: ' + rstRecv[1].decode()
-			for n in range(1, int(rstRecv[1].decode())+1):
-				file = open(directory + '/' + rstRecv[3*n-1].decode(), 'wb')
-				file.write(rstRecv[3*n+1])
+			n = 0
+			spot = 1
+			while n != rstRecv[1].decode():
+				file = open(directory + '/' + rstRecv[spot].decode(), 'wb')
+				spot = writeFile(file, rstRecv, spot)
+				n += 1
+				spot += 1
+			file.close()
 
 			print(directory + " restored successfully")
 
+def writeFile(file, msg, n):
+	nbits = int(msg[n + 3])
+	print(nbits)
+	n = n + 4
+	part = b''
+
+	while (msg[n])[-5:-3] != b'EOF':
+		part += msg[n]
+		nbits -= len(msg[n])
+		n += 1
+
+	file.write(part)
+
+	return n
  
