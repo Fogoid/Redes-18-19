@@ -141,15 +141,15 @@ def sendUDPMessage(message,CS_Socket,address,port):
 	return 1
 
 #Function that registers the BS server on the CS through UDP
-def startBS(CS_Socket,address,port):
+def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 
-	register = 'REG '+address+' '+str(port)+'\n'
+	register = 'REG '+BS_address+' '+str(BS_port)+'\n'
 	msgRecv = ""
 	centralServer = ''
 
 	while 1:
 		print("startBS while")
-		CS_Socket.sendto(register.encode(),(address,port))
+		CS_Socket.sendto(register.encode(),(CS_address,CS_port))
 		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
 		msgRecv = msgRecv.decode()
 		print(msgRecv)
@@ -206,4 +206,20 @@ def DLBCommand(msgRecv,CS_Socket,address,port):
 		DBR_msg += 'NOK\n'
 
 	sendUDPMessage(DLB_msg,CS_Socket,address,port)
+	return 0
+
+#Defines the CTRL+C handler
+def exitGracefully(CS_Socket,CS_address,CS_port,BS_address,BS_port):
+	register = 'UNR '+BS_address+' '+str(BS_port)+'\n'
+	msgRecv = ""
+	centralServer = ''
+
+	while 1:
+		CS_Socket.sendto(register.encode(),(CS_address,CS_port))
+		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
+		msgRecv = msgRecv.decode()
+		print(msgRecv)
+
+		if msgRecv == "UAR OK\n":
+			return 1
 	return 0

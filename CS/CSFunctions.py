@@ -32,24 +32,26 @@ def UDPConnections(address,CSport):
 
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	BS_Socket.bind((address, CSport))
-	BS_Server = ''
+	BS_Socket.bind((address, CSport))	
+	BS_Server = ''	
 	msgRecv =''
 
-	#while 1:
-	print("UDPConnections while")
-	(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
-	msgRecv = msgRecv.decode().split(' ')
-	print(msgRecv)
-	RGR_msg = 'RGR '
-	if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
-		file = open('backupServers.txt','ab+')
-		file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
-		file.close()
-		RGR_msg+='OK\n'
-	else:
-		RGR_msg+='NOK\n'
-	BS_Socket.sendto(RGR_msg.encode(),(msgRecv[1],int(msgRecv[2].rstrip('\n'))))
+	while 1:
+	
+
+		(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
+		print(BS_Server)
+		msgRecv = msgRecv.decode().split(' ')
+		print(msgRecv)
+		RGR_msg = 'RGR '
+		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
+			file = open('backupServers.txt','ab+')
+			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
+			file.close()
+			RGR_msg+='OK\n'
+		else:
+			RGR_msg+='NOK\n'
+		BS_Socket.sendto(RGR_msg.encode(),(BS_Server[0],int(BS_Server[1])))
 	BS_Socket.close()
 	return 0
 
@@ -89,7 +91,7 @@ def AUTCommand(message,User_Socket):
 	return 0
 
 
-def DLUCommand(serverSocket,username):
+def DLUCommand(username,User_Socket):
 	DLR_msg = 'DLR '
 
 	username_directory = 'user_'+username
@@ -103,10 +105,32 @@ def DLUCommand(serverSocket,username):
 	else:
 		DLR_msg +='NOK\n'
 
-	sendTCPMessage(DLR_msg,serverSocket)
+	sendTCPMessage(DLR_msg,User_Socket)
 	return 0
 
-def BCKCommand(msgRecv):
+def BCKCommand(msgRecv,username,User_Socket):
+
+	BKR_msg='BKR '
+	username_directory = "user_"+username
+
+	if CMDMatcher(msgRecv, '^BKR\s[a-z]+\s[0-9]+\s'):
+		msgRecv = msgRecv.split(' ')
+		if os.path.exists(username_directory+'/'+msgRecv[1]):
+			if os.path.exists(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt'):
+				with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
+					BS_Server = file.readline()
+					BKR_msg+=BS_Server + ' ' 
+			else:
+				with open(backupServers,'r') as BS_file:
+					with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','w') as user_file:
+						BS_Server = BS_file.readline()
+						user_file.write(BS_Server)
+						BKR_msg+=BS_Server + ' ' 
+	else:
+		BKR_msg = 'ERR\n'
+
+
+	sendTCPMessage(User_Socket,BKR_msg)
 	return 0
 
 def RSTCommand(msgRecv,username,User_Socket):

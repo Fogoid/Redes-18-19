@@ -6,11 +6,15 @@ import signal
 from BSFunctions import *
 
 #Starting the UDP socket to register in the CS
-(BSport, addressName, CSport) = getConnectionDetails()
-address = socket.gethostbyname(addressName)
+(BS_port, CS_addressName, CS_port) = getConnectionDetails()
+CS_address = socket.gethostbyname(CS_addressName)
+BS_address = socket.gethostbyname('localhost')
 CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-startBS(CS_Socket,address,CSport)
+startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port)
 
+
+global exit
+exit = 0
 #This part will be responsible for the user TCP protocol implementation
 newPID = os.fork()
 buffersize = 256
@@ -50,20 +54,11 @@ buffersize = 256
 #This piece of code is working but disable CTRL + C interrupt. Let's leave it in a comment for now.
 # ----------------------------------------------------------------------------------
 #def SIGINT_Handler(signum,frame):
-#	register = 'UNR '+address+' '+str(port)+'\n'
-#	msgRecv = ""
-#	centralServer = ''
-#
-#	while 1:
-#		CS_Socket.sendto(register.encode(),(address,port))
-#		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
-#		msgRecv = msgRecv.decode()
-#		print(msgRecv)
-#
-#		if msgRecv == "UAR OK\n":
-#			return 1
+#	exit = 1
+#	print(exit)
 #	return 0
-#
+
+
 #signal.signal(signal.SIGINT,SIGINT_Handler)
 # ----------------------------------------------------------------------------------
 
@@ -74,15 +69,22 @@ buffersize = 256
 while 1:
 	(msgRecv, centralServer) = CS_Socket.recvfrom(1024) 
 	msgRecv = msgRecv.decode()
-	msgRecv.split(' ')
+	msgRecv= msgRecv.split(' ')
+
+	print(exit)
 
 	if CMDMatcher(msgRecv[0],'^LSF$'):
-				LSFCommand(msgRecv,CS_Socket,address,port)
+				LSFCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^LSU$'):
-				LSUCommand(msgRecv,CS_Socket,address,port)
+				LSUCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^DLB$'):
-				DLBCommand(msgRecv,CS_Socket,address,port)
+				DLBCommand(msgRecv,CS_Socket,CS_address,CS_port)
+
+	elif exit ==1:
+		exitGracefully(CS_Socket,CS_address,CS_port,BS_address,BS_port)
+		break;
 	else:
-		sendUDPError(CS_Socket,address,port)
+		sendUDPError(CS_Socket,CS_address,CS_port)
+print("Exited gracefully")

@@ -20,7 +20,7 @@ if newPID == 0:
 	#if newPID == 0:
 		#break
 else:
-	while 1 : 	
+	while 1: 	
 		Server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		Server_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		Server_Socket.bind((address, CSport))
@@ -33,16 +33,19 @@ else:
 
 			msgRecv = msgRecv.split(' ')
 			Username = msgRecv[1]
-			Password = msgRecv[2]
+			Password = msgRecv[2].rstrip('\n')
+			
 
 			msgRecv = User_Socket.recv(buffersize)
-			msgRecv = msgRecv.decode().split(' ')
+			msgRecv = msgRecv.decode()
+			msgRecv = msgRecv.split(' ')
+			print(Username+' '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
 			if CMDMatcher(msgRecv[0],'^DLU\n$'):
-				DLUCommand(User_Socket,Username)
+				DLUCommand(Username,User_Socket)
 
 			elif CMDMatcher(msgRecv[0],'^BCK$'):
-				BCKCommand(msgRecv)
+				BCKCommand(msgRecv,Username,User_Socket)
 
 			elif CMDMatcher(msgRecv[0],'^RST$'):
 				RSTCommand(msgRecv,Username,User_Socket)
