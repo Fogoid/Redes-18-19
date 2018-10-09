@@ -27,12 +27,21 @@ def CMDMatcher(msg, pattern):
 def sendTCPMessage(msg,User_Socket):
 	User_Socket.send(msg.encode())
 
-#Cicle that keeps waiting for new BS's to register
-def UDPConnections(address,CSport):
-
+#Simple function that communicates in TCP
+def communicateUDP(msg,BS_information):
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	BS_Socket.bind((address, CSport))	
+	BS_information = BS_information.split(' ')
+	BS_Socket.sendto(msg,(BS_information[0], int(BS_information[1].rstrip('\n'))))
+	(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
+	print(msgRecv)	
+
+
+#Cicle that keeps waiting for new BS's to register
+def UDPConnections(CS_address,CS_port):
+	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	BS_Socket.bind((CS_address, CS_port))	
 	BS_Server = ''	
 	msgRecv =''
 
@@ -79,7 +88,9 @@ def AUTCommand(message,User_Socket):
 		else:
 			with open(datafile,'w') as file:
 				file.write(password)
-			os.makedirs('user_'+message[1])	
+			os.makedirs('user_'+message[1])
+			file = open('user_'+message[1]+'/'+'BS_Register.txt','w') 
+			file.close()	
 			AUT_msg = 'NEW\n'
 	else:
 		AUT_msg = 'ERR\n'
@@ -108,10 +119,15 @@ def DLUCommand(username,User_Socket):
 	sendTCPMessage(DLR_msg,User_Socket)
 	return 0
 
-def BCKCommand(msgRecv,username,User_Socket):
+def BCKCommand(msgRecv,username,password,User_Socket):
 
-	BKR_msg='BKR '
+	BKR_user_msg ='BKR '
+	LSU_BS_msg = 'LSU' + ' ' + username + ' ' + password
+	BKR_BS_msg = ''
+
 	username_directory = "user_"+username
+	BS_Server = ''
+	register = 1
 
 	if CMDMatcher(msgRecv, '^BKR\s[a-z]+\s[0-9]+\s'):
 		msgRecv = msgRecv.split(' ')
@@ -119,18 +135,28 @@ def BCKCommand(msgRecv,username,User_Socket):
 			if os.path.exists(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt'):
 				with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
 					BS_Server = file.readline()
-					BKR_msg+=BS_Server + ' ' 
-			else:
-				with open(backupServers,'r') as BS_file:
-					with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','w') as user_file:
-						BS_Server = BS_file.readline()
-						user_file.write(BS_Server)
-						BKR_msg+=BS_Server + ' ' 
+					BKR_user_msg+=BS_Server + ' ' 
+		else:
+			os.makedirs('./'+username_directory+'/'+msgRecv[1])
+			with open("backupServers.txt",'r') as BS_file:
+				with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','w') as user_file:
+					BS_Server = BS_file.readline()
+					user_file.write(BS_Server)
+					BKR_user_msg+=BS_Server + ' '
+			with open('./'+username_directory+'/'+'BS_Register.txt','r') as bs_file:
+				for line in bs_file.readlines():
+					if line == BS_Server:
+						register = 0
+			if register == 1:
+				with open('./'+username_directory+'/'+'BS_Register.txt','ab+') as bs_file:
+					bs_file.write(BS_Server)
+					communicateUDP(LSU_BS_msg,BS_Server)
+
 	else:
-		BKR_msg = 'ERR\n'
+		BKR_user_msg = 'ERR\n'
 
 
-	sendTCPMessage(User_Socket,BKR_msg)
+	sendTCPMessage(User_Socket,BKR_user_msg)
 	return 0
 
 def RSTCommand(msgRecv,username,User_Socket):

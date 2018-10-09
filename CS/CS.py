@@ -8,11 +8,12 @@ from CSFunctions import *
 Username = ''
 Password = ''
 buffersize = 256
-CSport = getConnectionDetails()
-address = socket.gethostbyname('localhost')
+CS_port = getConnectionDetails()
+CS_address = socket.gethostbyname('localhost')
 newPID = os.fork()
+
 if newPID == 0:
-	UDPConnections(address,CSport)
+	UDPConnections(CS_address,CS_port)
 
 	
 #while 1:
@@ -23,7 +24,7 @@ else:
 	while 1: 	
 		Server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		Server_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		Server_Socket.bind((address, CSport))
+		Server_Socket.bind((CS_address, CS_port))
 		Server_Socket.listen(2)	
 		(User_Socket, client_address) = Server_Socket.accept()
 		msgRecv = User_Socket.recv(128)
@@ -45,7 +46,7 @@ else:
 				DLUCommand(Username,User_Socket)
 
 			elif CMDMatcher(msgRecv[0],'^BCK$'):
-				BCKCommand(msgRecv,Username,User_Socket)
+				BCKCommand(msgRecv,Username,Password,User_Socket)
 
 			elif CMDMatcher(msgRecv[0],'^RST$'):
 				RSTCommand(msgRecv,Username,User_Socket)
