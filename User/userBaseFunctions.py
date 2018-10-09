@@ -23,7 +23,8 @@ def CMDMatcher(msg, pattern):
 
 def dateFormatter(date):
 	date = date.split(' ')
-	newDate = date[3] + '.' + str(strptime(date[1], '%b').tm_mon) + '.' + date[5] + ' ' + date[4]
+	print(date)
+	newDate = date[3] + '.' + str(time.strptime(date[1], '%b').tm_mon) + '.' + date[5] + ' ' + date[4]
 	return newDate
 
 def sendMessage(mySocket, msgSent):
@@ -42,6 +43,13 @@ def recvMessage(mySocket, n):
 		
 	print((msg, "this was a received message"))
 	return msg
+
+def readFilesData(directory, filename, size):
+	data = b''
+	file = open('./' + directory + '/' + filename, 'rb')
+	data = file.read(size)
+
+	return data
 
 def authenticateUser(mySocket):
 
@@ -83,4 +91,9 @@ def AUTCommand(mySocket, username, password):
 	if CMDMatcher(autRecv[0], "^AUR$"):
 		status = autRecv[1]
 		return status
-	
+
+
+def getFileDetails(filename, directory):
+	date_time = dateFormatter(str(time.ctime(os.path.getmtime("./" + directory))))
+	size = os.path.getsize("./" + directory + "/" + filename)
+	return filename + ' ' + date_time + ' ' + str(size)

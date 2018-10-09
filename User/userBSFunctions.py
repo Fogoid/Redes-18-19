@@ -33,6 +33,25 @@ def RSBCommand(mySocket, directory, username, password):
 
 			print(directory + " restored successfully")
 
+def UPLCommand(mySocket, directory, filesInfoList, username, password)
+	msgSent = ('UPL ' + directory + ' ' + filesInfoList[0]).encode()
+	data = b''
+	AUTCommand(mySocket, username, password)
+
+	for n in range(1, filesInfoList[0]):
+		data = readFilesData(directory, filesInfoList[n*4 - 3], filesInfoList[n*4])
+		fileInfo = filesInfoList[n*4-3] + ' ' + filesInfoList[n*4-2] + ' ' + filesInfoList[n*4-1] + ' ' + filesInfoList[n*4]
+		msgSent += ' ' + fileInfo.encode() + data
+
+	sendMessage(mySocket, msgSent)
+	uplRecv = recvMessage(mySocket, 0).split()
+
+	if CMDMatcher(uplRecv[0], '^UPR$'):
+		if CMDMatcher(uplRecv[1], '^OK$'):
+			print("Directory backed up successfully")
+		elif CMDMatcher(uplRecv[1], '^NOK$'):
+			print("It wasn't possible to backup the directory")
+
 def writeFile(file, msg, n):
 	nbits = int(msg[n + 3])
 	print(nbits)
