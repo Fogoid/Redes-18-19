@@ -2,6 +2,7 @@ import socket
 import sys
 import os
 from CSBaseFunctions import *
+import random
 
 def DLRCommand(username, userSocket):
 	dlrMsg = 'DLR '
@@ -24,36 +25,30 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 
 	BKR_user_msg ='BKR '
 	LSU_BS_msg = 'LSU' + ' ' + username + ' ' + password
-	BKR_BS_msg = ''
+	LSF_BS_msg = 'LSF ' + username
+	BKR_BS_msg = b''
 
 	usernameDirectory = "user_"+username
 	BS_Server = ''
-	register = 1
 
 	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\s'):
 		msgRecv = msgRecv.split(' ')
-		if os.path.exists(usernameDirectory+'/'+msgRecv[1]):
-			if os.path.exists(usernameDirectory+'/'+msgRecv[1]+'/'+'IP_port.txt'):
-				with open(usernameDirectory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
-					BS_Server = file.readline()
-					BKR_user_msg+=BS_Server + '\n' 
+		if os.path.exists('./' + usernameDirectory + '/' + msgRecv[1]):
+			file = open('./' + usernameDirectory + '/' + msgRecv[1] + '/IP_port.txt','r')
+			[address, port] = file.readline().split(' ')
+			file.close()
+			LSF_BS_msg += msgRecv[1]
+			BKR_user_msg += communicateUDP(LSU_BS_msg, address, port, BS_Socket) #FIXME: missing some arguments 
 		else:
-			os.makedirs('./'+usernameDirectory+'/'+msgRecv[1])
-			with open("backupServers.txt",'r') as BS_file:
-				with open(usernameDirectory+'/'+msgRecv[1]+'/'+'IP_port.txt','w') as user_file:
-					BS_Server = BS_file.readline()
-					user_file.write(BS_Server)
-					BKR_user_msg+=BS_Server + '\n'
-			with open('./'+usernameDirectory+'/'+'BS_Register.txt','r') as bs_file:
-				for line in bs_file.readlines():
-					if line == BS_Server:
-						register = 0
-			if register == 1:
-				with open('./'+usernameDirectory+'/'+'BS_Register.txt','a+') as bs_file:
-					bs_file.write(BS_Server)
-					BS_Server = BS_Server.split(' ')
-					BS_Server[1] = BS_Server[1].rstrip('\n')
-					communicateUDP(LSU_BS_msg,BS_Server[0],BS_Server[1],BS_Socket)
+			BSconnection = getBS()
+			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt').read():
+				LSF_BS_msg += msgRecv[1]
+				[address, port] = BSconnection.split(' ')
+				BKR_user_msg += communicateUDP(LSF_BS_msg, address, port, BS_Socket) #FIXME: missing some arguments
+			else:
+				[address, port] = BSconnection.split(' ')
+				communicateUDP(LSU_BS_msg, address, port, BS_Socket) #FIXME: do next steps
+
 
 	else:
 		BKR_user_msg = 'ERR\n'
@@ -61,6 +56,18 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 	print(BKR_user_msg)
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
+
+def getBS(username):
+	file = open('./backupServers.txt', 'r')
+	count = 0
+	line = file.readline()
+	BSList = [line]
+	while  line != EOF:
+		BSList += file.readline() 
+		count += 1
+
+	file.close()
+	return BSList[floor(random.random()*count)]
 
 def RSRCommand(msgRecv, username, userSocket):
 
