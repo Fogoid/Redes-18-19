@@ -27,7 +27,7 @@ else:
 		Server_Socket.bind((CS_address, CS_port))
 		Server_Socket.listen(2)	
 		(User_Socket, client_address) = Server_Socket.accept()
-		msgRecv = User_Socket.recv(128)
+		msgRecv = User_Socket.recv(buffersize)
 		msgRecv = msgRecv.decode()
 
 		if AUTCommand(msgRecv,User_Socket):
@@ -35,29 +35,30 @@ else:
 			msgRecv = msgRecv.split(' ')
 			Username = msgRecv[1]
 			Password = msgRecv[2].rstrip('\n')
-			
+			print(Username+' '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
 			msgRecv = User_Socket.recv(buffersize)
 			msgRecv = msgRecv.decode()
-			msgRecv = msgRecv.split(' ')
-			print(Username+' '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
+			msgSplit = msgRecv.split(' ')
+			if msgRecv!='':
+				print(Username+' '+msgSplit[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
-			if CMDMatcher(msgRecv[0],'^DLU\n$'):
+			if CMDMatcher(msgSplit[0],'^DLU\n$'):
 				DLUCommand(Username,User_Socket)
 
-			elif CMDMatcher(msgRecv[0],'^BCK$'):
+			elif CMDMatcher(msgSplit[0],'^BCK$'):
 				BCKCommand(msgRecv,Username,Password,User_Socket)
 
-			elif CMDMatcher(msgRecv[0],'^RST$'):
+			elif CMDMatcher(msgSplit[0],'^RST$'):
 				RSTCommand(msgRecv,Username,User_Socket)
 
-			elif CMDMatcher(msgRecv[0],'^LSD\n$'):
+			elif CMDMatcher(msgSplit[0],'^LSD\n$'):
 				LSDCommand(Username,User_Socket)
 
-			elif CMDMatcher(msgRecv[0],'^LSF$'):
+			elif CMDMatcher(msgSplit[0],'^LSF$'):
 				LSFCommand(msgRecv,Username,User_Socket)
 
-			elif CMDMatcher(msgRecv[0],'^DEL$'):
+			elif CMDMatcher(msgSplit[0],'^DEL$'):
 				DELCommand(msgRecv,Username,User_Socket)
 
 			else:
