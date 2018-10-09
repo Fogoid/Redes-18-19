@@ -1,6 +1,7 @@
 import socket
 import sys
 import os
+import time
 from BSBaseFunctions import *
 
 def UPRCommand(message, username, userSocket):
@@ -16,17 +17,25 @@ def UPRCommand(message, username, userSocket):
 
 def RSBCommand(message, username, userSocket):
 	rbrMsg = b'RBR'
+	usernameDirectory = "user_"+username
+	files_info = b''
+	file_number = 0
+
 	if CMDMatcher(message, '^RSB\s[a-z]+\n$'):
 		message = message.split(' ')
-		for (paths, dirnames, files) in os.walk('./' + message[1]):
+		message[1] = message[1].rstrip('\n')
+		for (paths, dirnames, files) in os.walk('./' +usernameDirectory+'/'+message[1]):
 			for filename in files:
-				size = os.path.getsize('./' + message[1] + '/' + filename)
-				date = dateFormatter(time.ctime(os.path.getmtime(usernameDirectory+'/'+directory + '/' + filename)))
-				data = readFileData(message[1], filename, size)
-				rbrMsg += (' ' + filename + ' ' + date + ' ' + size).encode() + data
+				size = os.path.getsize('./' +usernameDirectory+'/'+message[1]+ '/' + filename)
+				date = dateFormatter(time.ctime(os.path.getmtime('./' +usernameDirectory+'/'+message[1] + '/' + filename)))
+				data = readFileData(usernameDirectory+'/'+message[1], filename, size)
+				temp_string = ' ' + filename + ' ' + str(date) + ' ' + str(size)
+				files_info += temp_string.encode() + b' ' + data + b' '
+				file_number+=1
 	else:
 		rbrMsg += b'ERR'
 
-	rbrMsg += b'\n'
+	file_number = str(file_number)
+	rbrMsg +=  file_number.encode()+files_info+ b'\n'
 	sendTCPMessage(userSocket, rbrMsg)
 	return 0

@@ -2,6 +2,8 @@ import socket
 import sys
 import argparse
 import re
+import os
+import time
 from shutil import rmtree
 
 def getConnectionDetails():
@@ -77,24 +79,28 @@ def sendTCPError(User_Socket,msg):
 	sendTCPMessage(User_Socket,'ERR\n')
 
 #User TCP authentication command
-def AUTCommand(User_Socket, message):
+def AUTCommand(message,User_Socket):
 	AUT_msg = ''
 	if verifyUser(message):
 		AUT_msg = 'AUR OK\n'
 	else:
 		AUT_msg = 'AUR NOK\n'
-	sendTCPMessage(User_Socket,AUT_msg)
+	sendTCPMessage(User_Socket,AUT_msg.encode())
+
+	if AUT_msg != 'NOK\n':
+		return 1
+	return 0
 
 #Checks if the given user is valid and is loaded in the BS server's users.txt list
 def verifyUser(message):
 
 	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
 		message = message.split(' ')
-		user = message[1]
+		user_file = 'user_' + message[1] +'.txt'
 		password = message[2].rstrip('\n')
 
-		if os.path.exists(user+'.txt'):
-			with open(user+'.txt') as file:
+		if os.path.exists(user_file):
+			with open(user_file,'r') as file:
 				if file.readline() == password:
 					return 1
 	return 0

@@ -18,7 +18,7 @@ startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
 global exit
 exit = 0
 #This part will be responsible for the user TCP protocol implementation
-#newPID = os.fork()
+newPID = os.fork()
 buffersize = 256
 
 
@@ -26,29 +26,34 @@ buffersize = 256
 # ----------------------------------------------------------------------------------
 # BS-User TCP requests while cicle
 ## ----------------------------------------------------------------------------------
-#while newPID!=0:
-#	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#	User_Socket.bind((BS_address, BS_port))
-#	User_Socket.listen(5)	
-#	(clientSocket, User_address) = User_Socket.accept()
-#
-#	msgRecv = mySocket.recv(buffersize).decode()
-#
-#	if AUTCommand(msgRecv):
-#		msgRecv = msgRecv.split(' ')
-#		username = msgRecv[1]
-#
-#		msgRecv = mySocket.recv(buffersize).decode()
-#
-#		if CMDMatcher(msgRecv[0],'^UPL$'):
-#				UPLCommand(msgRecv,User_Socket)
-#
-#		elif CMDMatcher(msgRecv[0],'^RSB$'):
-#				RSBCommand(msgRecv,username,User_Socket)
-#		else:
-#			sendTCPError(CS_Socket,address,port)
-#	User_Socket.close()
-#
+while newPID!=0:
+	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	BS_Socket.bind((BS_address, BS_port))
+	BS_Socket.listen(5)	
+	(User_Socket, User_address) = BS_Socket.accept()
+
+	print(User_address)
+	msgRecv = User_Socket.recv(buffersize).decode()
+
+	if AUTCommand(msgRecv,User_Socket):
+		msgRecv = msgRecv.split(' ')
+		username = msgRecv[1]
+
+		msgRecv = User_Socket.recv(buffersize).decode()
+		msgSplit = msgRecv.split(' ')
+
+		print(msgRecv)
+		if CMDMatcher(msgSplit[0],'^UPL$'):
+				UPLCommand(msgRecv,User_Socket)
+
+		elif CMDMatcher(msgSplit[0],'^RSB$'):
+				RSBCommand(msgRecv,username,User_Socket)
+		else:
+			sendTCPError(CS_Socket,address,port)
+	User_Socket.close()
+	BS_Socket.close()
+
 	
 
 

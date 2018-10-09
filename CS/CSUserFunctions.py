@@ -65,10 +65,13 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 def RSRCommand(msgRecv, username, userSocket):
 
 	rsrMsg ='RSR '
+	usernameDirectory = "user_"+username
+
 	if CMDMatcher(msgRecv, '^RST\s[a-z]+\n$'):
 		msgRecv = msgRecv.split(' ')
-		if os.path.exists('user_'+username+'/'+msgRecv[1]):
-			with open('user_'+ username + '/' + msgRecv[1] + '/' + 'IP_port.txt','r') as file:
+		directory = msgRecv[1].rstrip('\n')
+		if os.path.exists('./'+usernameDirectory+'/'+directory):
+			with open('./'+usernameDirectory+ '/' + directory + '/' + 'IP_port.txt','r') as file:
 				 rsrMsg += file.readline()+'\n'
 		else:
 			rsrMsg += 'EOF\n'
