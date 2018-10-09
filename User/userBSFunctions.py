@@ -12,6 +12,7 @@ def RSBCommand(mySocket, directory, username, password):
 
 	rstRecv = b''
 	rstRecv = recvMessage(mySocket, 1).split(b' ')
+	rstRecv[-1] = (rstRecv[-1])[:-1]
 	
 	if CMDMatcher(rstRecv[0], b'^RBR$'):
 		if CMDMatcher(rstRecv[1], b'^EOF$'):
@@ -22,27 +23,26 @@ def RSBCommand(mySocket, directory, username, password):
 			if not os.path.exists(directory):
 				os.makedirs(directory)
 			msg = 'Number of files: ' + rstRecv[1].decode()
-			n = 0
-			spot = 1
-			while n != rstRecv[1].decode():
-				file = open(directory + '/' + rstRecv[spot].decode(), 'wb')
-				spot = writeFile(file, rstRecv, spot)
-				n += 1
-				spot += 1
-			file.close()
+			index = 2
+			for n in range(0, int(rstRecv[1].decode())):
+				file = open('./' + directory + '/' + rstRecv[index].decode(), 'wb')
+				index = writeFileData(file, rstRecv, index, n)
+				file.close()
 
 			print(directory + " restored successfully")
 
-def UPLCommand(mySocket, directory, filesInfoList, username, password)
-	msgSent = ('UPL ' + directory + ' ' + filesInfoList[0]).encode()
+def UPLCommand(mySocket, directory, filesInfoList, username, password):
+	msgSent = 'UPL ' + directory + ' ' + filesInfoList[0]
+	msgSent = msgSent.encode()
 	data = b''
 	AUTCommand(mySocket, username, password)
 
-	for n in range(1, filesInfoList[0]):
-		data = readFilesData(directory, filesInfoList[n*4 - 3], filesInfoList[n*4])
+	for n in range(1, int(filesInfoList[0])+1):
+		data = readFilesData(directory, filesInfoList[n*4 - 3], int(filesInfoList[n*4]))
 		fileInfo = filesInfoList[n*4-3] + ' ' + filesInfoList[n*4-2] + ' ' + filesInfoList[n*4-1] + ' ' + filesInfoList[n*4]
-		msgSent += ' ' + fileInfo.encode() + data
+		msgSent += b' ' + fileInfo.encode() + data
 
+	print(msgSent)
 	sendMessage(mySocket, msgSent)
 	uplRecv = recvMessage(mySocket, 0).split()
 
@@ -52,18 +52,4 @@ def UPLCommand(mySocket, directory, filesInfoList, username, password)
 		elif CMDMatcher(uplRecv[1], '^NOK$'):
 			print("It wasn't possible to backup the directory")
 
-def writeFile(file, msg, n):
-	nbits = int(msg[n + 3])
-	print(nbits)
-	n = n + 4
-	part = b''
-
-	while (msg[n])[-5:-3] != b'EOF':
-		part += msg[n]
-		nbits -= len(msg[n])
-		n += 1
-
-	file.write(part)
-
-	return n
  

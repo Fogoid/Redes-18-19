@@ -24,11 +24,13 @@ def CMDMatcher(msg, pattern):
 def dateFormatter(date):
 	date = date.split(' ')
 	print(date)
-	newDate = date[3] + '.' + str(time.strptime(date[1], '%b').tm_mon) + '.' + date[5] + ' ' + date[4]
+	newDate = str("%02d" % int(date[3])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[5] + ' ' + date[4]
 	return newDate
 
 def sendMessage(mySocket, msgSent):
-	mySocket.send(msgSent.encode())
+	if not isinstance(msgSent, bytes):
+		msgSent = msgSent.encode()
+	mySocket.send(msgSent)
 
 def recvMessage(mySocket, n):
 	if n:
@@ -50,6 +52,26 @@ def readFilesData(directory, filename, size):
 	data = file.read(size)
 
 	return data
+
+def writeFileData(file, dataList, i):
+	size = int(dataList[i+3].decode())
+	print((dataList[-1])[:-1])
+	print(dataList[1].decode())
+	i += 4
+	data = dataList[i]
+	
+	while len(data) != size:
+		i += 1
+		data += b' ' + dataList[i]
+
+	file.write(data)
+
+	return i + 1
+
+def getFileDetails(filename, directory):
+	date_time = dateFormatter(str(time.ctime(os.path.getmtime("./" + directory))))
+	size = os.path.getsize("./" + directory + "/" + filename)
+	return filename + ' ' + date_time + ' ' + str(size)
 
 def authenticateUser(mySocket):
 
@@ -77,7 +99,6 @@ def authenticateUser(mySocket):
 		else:
 			print("Please insert login XXXXX NNNNNNNN\nXXXXX - Your login 5 digit number\nNNNNNNNN - Your 8 character long password")
 
-
 #Prepares the username and password for the server protocol in order to authenticate the user
 def AUTCommand(mySocket, username, password):
 	
@@ -92,8 +113,3 @@ def AUTCommand(mySocket, username, password):
 		status = autRecv[1]
 		return status
 
-
-def getFileDetails(filename, directory):
-	date_time = dateFormatter(str(time.ctime(os.path.getmtime("./" + directory))))
-	size = os.path.getsize("./" + directory + "/" + filename)
-	return filename + ' ' + date_time + ' ' + str(size)
