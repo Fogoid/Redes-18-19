@@ -34,7 +34,6 @@ def LSFCommand(mySocket, directory): #finish me later
 			msg += lsfRecv[3*n+1:3*n+3]
 		print(msg)
 
-
 #The command that processes the Delete user request
 def DLUCommand(mySocket):
 		
@@ -54,21 +53,38 @@ def DLUCommand(mySocket):
 			return 1
 
 def BCKCommand(mySocket, directory, username, password): #finish me later
-	filenames = []
 	msgSent = "BCK " + directory + ' '
+	filesNumber = 0
+	filesInfo = ''
 
 	for dirpath, dirnames, files in os.walk("./" + directory):
 		for filename in files:
-			filenames += [filename]
-			size = os.path.getsize(directory + '/' + filename)
-			date = dateFormatter(time.ctime(os.path.getmtime(directory + '/' + filename)))
-			print(date)
-			msgSent += filename + ' ' + date + ' ' + str(size) + '\n'
+			filesInfo += ' ' + getFileDetails(filename, directory)
+			filesNumber += 1
+
+	msgSent += str(filesNumber) + filesInfo + '\n'
 
 	print(msgSent)
 
+	sendMessage(mySocket, msgSent)
+	bckRecv = (recvMessage(mySocket, 1).decode()).split(' ')
+
+	if CMDMatcher(bckRecv[0], '^BKR$'):
+		if CMDMatcher(bckRecv[1], '^EOF$'):
+			print("Request cant be processed")
+		elif CMDMatcher(bckRecv[1], '^ERR$'):
+			print("Request not correctly formulated")
+		else:
+			mySocket.close()
+
+			mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+			mySocket.connect((bckRecv[1], int(bckRecv[2])))
+
+			UPLCommand(mySocket, directory, bckRecv[3:], username, password)
+
 def DELCommand(mySocket, directory):
-	msgSent = "DEL " + directory
+	msgSent = "DEL " + directory + '\n'
 
 	sendMessage(mySocket, msgSent)
 	delRcv = recvMessage(mySocket, 0).split()

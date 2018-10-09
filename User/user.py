@@ -22,7 +22,6 @@ while not exit:
 	#Creates a socket with a given protocol to establish a connection
 	mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	
 	if not loggedIn:
 		mySocket.connect((address, port))
 		
