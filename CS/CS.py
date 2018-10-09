@@ -21,6 +21,9 @@ if newPID == 0:
 	#if newPID == 0:
 		#break
 else:
+	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 	while 1: 	
 		Server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		Server_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,7 +50,7 @@ else:
 				DLUCommand(Username,User_Socket)
 
 			elif CMDMatcher(msgSplit[0],'^BCK$'):
-				BCKCommand(msgRecv,Username,Password,User_Socket)
+				BCKCommand(msgRecv,Username,Password,User_Socket,BS_Socket)
 
 			elif CMDMatcher(msgSplit[0],'^RST$'):
 				RSTCommand(msgRecv,Username,User_Socket)

@@ -9,14 +9,14 @@ from BSFunctions import *
 (BS_port, CS_addressName, CS_port) = getConnectionDetails()
 CS_address = socket.gethostbyname(CS_addressName)
 BS_address = socket.gethostbyname('localhost')
-CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port)
+CS_Start_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
 
 
 global exit
 exit = 0
 #This part will be responsible for the user TCP protocol implementation
-newPID = os.fork()
+#newPID = os.fork()
 buffersize = 256
 
 
@@ -26,7 +26,7 @@ buffersize = 256
 ## ----------------------------------------------------------------------------------
 #while newPID!=0:
 #	User_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#	User_Socket.bind((address, 58011))
+#	User_Socket.bind((BS_address, BS_port))
 #	User_Socket.listen(5)	
 #	(clientSocket, User_address) = User_Socket.accept()
 #
@@ -66,6 +66,11 @@ buffersize = 256
 # ----------------------------------------------------------------------------------
 # BS-CS UDP requests while cicle
 # ----------------------------------------------------------------------------------
+
+CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+CS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+CS_Socket.bind((BS_address, BS_port))
+
 while 1:
 	(msgRecv, centralServer) = CS_Socket.recvfrom(1024) 
 	msgRecv = msgRecv.decode()

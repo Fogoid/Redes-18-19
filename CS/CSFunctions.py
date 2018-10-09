@@ -28,11 +28,10 @@ def sendTCPMessage(msg,User_Socket):
 	User_Socket.send(msg.encode())
 
 #Simple function that communicates in TCP
-def communicateUDP(msg,BS_information):
+def communicateUDP(msg,BS_IP,BS_Port,BS_Socket):
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	BS_information = BS_information.split(' ')
-	BS_Socket.sendto(msg,(BS_information[0], int(BS_information[1].rstrip('\n'))))
+	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
 	print(msgRecv)	
 
@@ -119,7 +118,7 @@ def DLUCommand(username,User_Socket):
 	sendTCPMessage(DLR_msg,User_Socket)
 	return 0
 
-def BCKCommand(msgRecv,username,password,User_Socket):
+def BCKCommand(msgRecv,username,password,User_Socket,BS_Socket):
 
 	BKR_user_msg ='BKR '
 	LSU_BS_msg = 'LSU' + ' ' + username + ' ' + password
@@ -129,34 +128,36 @@ def BCKCommand(msgRecv,username,password,User_Socket):
 	BS_Server = ''
 	register = 1
 
-	if CMDMatcher(msgRecv, '^BKR\s[a-z]+\s[0-9]+\s'):
+	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\s'):
 		msgRecv = msgRecv.split(' ')
 		if os.path.exists(username_directory+'/'+msgRecv[1]):
 			if os.path.exists(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt'):
 				with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
 					BS_Server = file.readline()
-					BKR_user_msg+=BS_Server + ' ' 
+					BKR_user_msg+=BS_Server + '\n' 
 		else:
 			os.makedirs('./'+username_directory+'/'+msgRecv[1])
 			with open("backupServers.txt",'r') as BS_file:
 				with open(username_directory+'/'+msgRecv[1]+'/'+'IP_port.txt','w') as user_file:
 					BS_Server = BS_file.readline()
 					user_file.write(BS_Server)
-					BKR_user_msg+=BS_Server + ' '
+					BKR_user_msg+=BS_Server + '\n'
 			with open('./'+username_directory+'/'+'BS_Register.txt','r') as bs_file:
 				for line in bs_file.readlines():
 					if line == BS_Server:
 						register = 0
 			if register == 1:
-				with open('./'+username_directory+'/'+'BS_Register.txt','ab+') as bs_file:
+				with open('./'+username_directory+'/'+'BS_Register.txt','a+') as bs_file:
 					bs_file.write(BS_Server)
-					communicateUDP(LSU_BS_msg,BS_Server)
+					BS_Server = BS_Server.split(' ')
+					BS_Server[1] = BS_Server[1].rstrip('\n')
+					communicateUDP(LSU_BS_msg,BS_Server[0],BS_Server[1],BS_Socket)
 
 	else:
 		BKR_user_msg = 'ERR\n'
 
-
-	sendTCPMessage(User_Socket,BKR_user_msg)
+	print(BKR_user_msg)
+	sendTCPMessage(BKR_user_msg,User_Socket)
 	return 0
 
 def RSTCommand(msgRecv,username,User_Socket):
