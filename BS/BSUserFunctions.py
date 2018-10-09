@@ -16,7 +16,7 @@ def UPRCommand(message, username, userSocket):
 	return 0
 
 def RSBCommand(message, username, userSocket):
-	rbrMsg = b'RBR'
+	rbrMsg = b'RBR '
 	usernameDirectory = "user_"+username
 	files_info = b''
 	file_number = 0
@@ -30,7 +30,7 @@ def RSBCommand(message, username, userSocket):
 				date = dateFormatter(time.ctime(os.path.getmtime('./' +usernameDirectory+'/'+message[1] + '/' + filename)))
 				data = readFileData(usernameDirectory+'/'+message[1], filename, size)
 				temp_string = ' ' + filename + ' ' + str(date) + ' ' + str(size)
-				files_info += temp_string.encode() + b' ' + data + b' '
+				files_info += temp_string.encode() + b' ' + data
 				file_number+=1
 	else:
 		rbrMsg += b'ERR'
