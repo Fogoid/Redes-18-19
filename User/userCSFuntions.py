@@ -52,7 +52,7 @@ def DLUCommand(mySocket):
 			print("Couldn't delete user")
 			return 1
 
-def BCKCommand(mySocket, directory, username, password): #finish me later
+def BCKCommand(mySocket, directory, username, password):
 	msgSent = "BCK " + directory + ' '
 	filesNumber = 0
 	filesInfo = ''

@@ -21,3 +21,14 @@ User/planes/teste2.txt
 User/planes/teste.txt
 CS/user_86408.txt
 CS/backupServers.txt
+CS/user_99999/smallfiles/IP_port.txt
+CS/user_99999/planes/IP_port.txt
+CS/user_99999/BS_Register.txt
+BS/user_99999/planes/white-plane-sky.jpg
+BS/user_99999/planes/emirates.png
+BS/user_99999/planes/electricplane.jpg
+BS/user_99999/planes/airbus-321-neo.jpg
+BS/user_99999.txt.txt
+BS/__pycache__/BSUserFunctions.cpython-35.pyc
+BS/__pycache__/BSCSFunctions.cpython-35.pyc
+BS/__pycache__/BSBaseFunctions.cpython-35.pyc

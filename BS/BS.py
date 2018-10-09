@@ -3,7 +3,9 @@ import socket
 import re
 import os
 import signal
-from BSFunctions import *
+from BSBaseFunctions import CMDMatcher
+from BSUserFunctions import *
+from BSCSFunctions import *
 
 #Starting the UDP socket to register in the CS
 (BS_port, CS_addressName, CS_port) = getConnectionDetails()
@@ -79,7 +81,7 @@ while 1:
 	print(exit)
 
 	if CMDMatcher(msgRecv[0],'^LSF$'):
-				LSFCommand(msgRecv,CS_Socket,CS_address,CS_port)
+				LURCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^LSU$'):
 				LSUCommand(msgRecv,CS_Socket,CS_address,CS_port)

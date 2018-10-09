@@ -5,9 +5,7 @@ import re
 import os
 import time
 
-
 def getConnectionDetails():
-
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Gives the name of the address do connect')
 	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Gives the port the user will connect to')
@@ -53,10 +51,9 @@ def readFilesData(directory, filename, size):
 
 	return data
 
+#Writes data on a file
 def writeFileData(file, dataList, i):
 	size = int(dataList[i+3].decode())
-	print((dataList[-1])[:-1])
-	print(dataList[1].decode())
 	i += 4
 	data = dataList[i]
 	

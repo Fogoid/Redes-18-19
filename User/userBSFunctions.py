@@ -26,7 +26,7 @@ def RSBCommand(mySocket, directory, username, password):
 			index = 2
 			for n in range(0, int(rstRecv[1].decode())):
 				file = open('./' + directory + '/' + rstRecv[index].decode(), 'wb')
-				index = writeFileData(file, rstRecv, index, n)
+				index = writeFileData(file, rstRecv, index)
 				file.close()
 
 			print(directory + " restored successfully")
