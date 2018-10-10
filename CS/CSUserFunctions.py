@@ -144,7 +144,8 @@ def LFDCommand(msgRecv, username, userSocket):
 	lfdMsg='LFD '
 	usernameDirectory = "user_" + username
 
-	if CMDMatcher(msgRecv, '^LSF\s[a-z]+\n$'):
+	print(msgRecv)
+	if CMDMatcher(msgRecv, '^LSF\s[a-z]+\s'):
 		msgRecv=msgRecv.split(' ')
 		msgRecv[1] = msgRecv[1].rstrip('\n')
 		if os.path.exists(usernameDirectory + '/' + msgRecv[1]):
@@ -157,7 +158,7 @@ def LFDCommand(msgRecv, username, userSocket):
 	else:
 		lfdMsg='ERR\n'
 
-	sendTCPMessage(lfdMsg, userSocket)
+	sendTCPMessage(userSocket,lfdMsg)
 	return 0
 
 def DDRCommand(msgRecv,username,userSocket):
