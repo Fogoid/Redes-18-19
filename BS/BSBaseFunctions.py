@@ -108,5 +108,5 @@ def verifyUser(message):
 #Simple function that sends a UDP message
 def sendUDPMessage(message,CS_Socket,address,port):
 	message = ''.join(message)
-	CS_Socket.sendto(LFD_msg.encode(),(address,port))
+	CS_Socket.sendto(message.encode(),(address,port))
 	return 1

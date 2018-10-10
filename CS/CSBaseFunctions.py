@@ -34,33 +34,43 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	data = b''
-	data = BS_Socket.recv()
-	print(msgRecv)
+	print((msg, "this was a sent message"))
+	data = BS_Socket.recvfrom(256)
+	print((data, "this was a received message"))
+	socket.close()
+	return data
 	
 
 #Cicle that keeps waiting for new BS's to register
 def UDPConnections(CS_address,CS_port):
-	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	BS_Socket.bind((CS_address, CS_port))	
-	BS_Server = ''	
-	msgRecv =''
 
 	while True:
-		(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
-		print(BS_Server)
+		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		BS_Socket.bind((CS_address, CS_port))	
+		
+		BS_Server = ''	
+		msgRecv =''
+
+		(msgRecv, BS_Server) = BS_Socket.recvfrom(32)
 		msgRecv = msgRecv.decode().split(' ')
-		print(msgRecv)
+		print(msgRecv, "this was a received msg")
 		RGR_msg = 'RGR '
+
 		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
+			print('ola')
 			file = open('backupServers.txt','ab+')
+			print(msgRecv[1] + ' ' + msgRecv[2])
 			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
 			file.close()
 			RGR_msg+='OK\n'
+			print(RGR_msg)
 		else:
 			RGR_msg+='NOK\n'
 		BS_Socket.sendto(RGR_msg.encode(),(BS_Server[0],int(BS_Server[1])))
-	BS_Socket.close()
+			
+		BS_Socket.close()
+
 	return 0
 
 #Function that eliminates the user from the list of users

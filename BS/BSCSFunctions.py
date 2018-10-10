@@ -6,19 +6,21 @@ from BSBaseFunctions import *
 #Function that registers the BS server on the CS through UDP
 def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 
-	register = 'REG '+BS_address+' '+str(BS_port)+'\n'
+	register = 'REG ' + BS_address + ' ' + str(BS_port)+'\n'
 	msgRecv = ""
 	centralServer = ''
-
-	while True:
-		print("startBS while")
-		CS_Socket.sendto(register.encode(),(CS_address,CS_port))
+	
+	CS_Socket.sendto(register.encode(),(CS_address,CS_port))
+	while True: 
 		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
-		msgRecv = msgRecv.decode()
-		print(msgRecv)
+		if msgRecv:
+			break 
+	msgRecv = msgRecv.decode()
 
-		if CMDMatcher(msgRecv, "^RGR OK\n$"):
-			return 1
+	CS_Socket.close()
+	if CMDMatcher(msgRecv, "^RGR OK\n$"):
+		return 1
+
 	return 0
 
 '''
@@ -40,10 +42,11 @@ def LURCommand(msgRecv, CS_Socket, address, port):
 	lurMsg='LUR '
 	filename='user_'+msgRecv[1]+'.txt'
 
-	if CMDMatcher(msgRecv[0]+msgRecv[1]+msgRecv[2], '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
+	full_msg = msgRecv[0]+' '+msgRecv[1]+' '+msgRecv[2]
+	if CMDMatcher(full_msg, '^LSU\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
 		if not os.path.exists(filename):
-			with open(filename) as file:
-				file.write(msgRecv[2].rstrip('\n').encode())
+			with open(filename,'w') as file:
+				file.write(msgRecv[2].rstrip('\n'))
 			os.makedirs('user_'+msgRecv[1])
 			lurMsg += 'OK\n'
 		else:

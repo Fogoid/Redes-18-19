@@ -14,8 +14,9 @@ def LSFCommand(BSSocket, BSIP, BSport, username, dirname):
 		return 'ERR'
 
 def LSUCommand(BSSocket, BSIP, BSport, username, password):
-	lsuMsg = 'DLB ' + username + ' ' + password + '\n'
+	lsuMsg = 'LSU ' + username + ' ' + password + '\n'
 	msgRecv = communicateUDP(lsuMsg, BSIP, BSport, BSSocket)
+	print(("LSU received this msg:", msgRecv))
 	splitedMsg = msgRecv.split(' ')
 	if CMDMatcher(msgRecv, '^LUR\s[A-Z]\n$'):
 		return splitedMsg[1]

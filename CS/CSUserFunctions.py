@@ -2,6 +2,7 @@ import socket
 import sys
 import os
 from CSBaseFunctions import *
+from CSBSFunctions import *
 import random
 
 def DLRCommand(username, userSocket):
@@ -24,7 +25,7 @@ def DLRCommand(username, userSocket):
 def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 
 	BKR_user_msg ='BKR '
-
+	LSF_BS_msg = ''
 	usernameDirectory = "user_"+username
 	BS_Server = ''
 	status = 'NOK'
@@ -43,16 +44,20 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
-			BSconnection = getBS()
+			BSconnection = getBS(username)
+			print(BSconnection)
 			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt').read():
 				LSF_BS_msg += splitedMsg[1]
-				[address, port] = BSconnection.split(' ')
-				status = 'OK'
+				print(BSconnection)
+				address = BSconnection.split(' ')
+				status = 'OK\n'
+				print("cheguei aqui")
 			else:
 				[address, port] = BSconnection.split(' ')
 				status = LSUCommand(BS_Socket, address, port, username, password)
 
 			if CMDMatcher(status, '^OK\n$'):
+				print('ola')
 				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
 			else:
 				BKR_user_msg += 'ERR\n'
@@ -85,15 +90,12 @@ def getNotCommon(list1, list2, notCommon):
 
 def getBS(username):
 	file = open('./backupServers.txt', 'r')
-	count = 0
-	line = file.readline()
-	BSList = [line]
-	while  line != EOF:
-		BSList += file.readline() 
-		count += 1
-
+	msg = file.readline()
+	print(msg, "this is in the file")
+	#FIXME for more BS
 	file.close()
-	return BSList[floor(random.random()*count)]
+	
+	return msg 
 
 def RSRCommand(msgRecv, username, userSocket):
 

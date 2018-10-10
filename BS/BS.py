@@ -8,14 +8,15 @@ from BSUserFunctions import *
 from BSCSFunctions import *
 
 #Starting the UDP socket to register in the CS
+global exit
+
 (BS_port, CS_addressName, CS_port) = getConnectionDetails()
 CS_address = socket.gethostbyname(CS_addressName)
 BS_address = socket.gethostbyname('localhost')
 CS_Start_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
+exit = startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
 
 
-global exit
 exit = 0
 #This part will be responsible for the user TCP protocol implementation
 newPID = os.fork()
@@ -26,24 +27,23 @@ buffersize = 256
 # ----------------------------------------------------------------------------------
 # BS-User TCP requests while cicle
 ## ----------------------------------------------------------------------------------
-while newPID!=0:
+while True
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	BS_Socket.bind((BS_address, BS_port))
 	BS_Socket.listen(5)
 	(User_Socket, User_address) = BS_Socket.accept()
 
-	print(User_address)
 	msgRecv = User_Socket.recv(buffersize).decode()
 
 	if AUTCommand(msgRecv,User_Socket):
+
 		msgRecv = msgRecv.split(' ')
 		username = msgRecv[1]
 
 		msgRecv = User_Socket.recv(buffersize).decode()
 		msgSplit = msgRecv.split(' ')
 
-		print(msgRecv)
 		if CMDMatcher(msgSplit[0],'^UPL$'):
 				UPLCommand(msgRecv,User_Socket)
 
@@ -51,6 +51,7 @@ while newPID!=0:
 				RSBCommand(msgRecv,username,User_Socket)
 		else:
 			sendTCPError(CS_Socket,address,port)
+	
 	User_Socket.close()
 	BS_Socket.close()
 
@@ -83,13 +84,14 @@ while 1:
 	msgRecv = msgRecv.decode()
 	msgRecv= msgRecv.split(' ')
 
+	print((msgRecv, "this was a received msg"))
 	print(exit)
 
 	if CMDMatcher(msgRecv[0],'^LSF$'):
-				LURCommand(msgRecv,CS_Socket,CS_address,CS_port)
+				LFDCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^LSU$'):
-				LSUCommand(msgRecv,CS_Socket,CS_address,CS_port)
+				LURCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^DLB$'):
 				DLBCommand(msgRecv,CS_Socket,CS_address,CS_port)
@@ -97,6 +99,6 @@ while 1:
 	elif exit ==1:
 		exitGracefully(CS_Socket,CS_address,CS_port,BS_address,BS_port)
 		break;
-	else:
-		sendUDPError(CS_Socket,CS_address,CS_port)
+	#else:
+		#sendUDPError(CS_Socket,CS_address,CS_port)
 print("Exited gracefully")
