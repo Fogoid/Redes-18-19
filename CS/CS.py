@@ -15,26 +15,21 @@ newPID = os.fork()
 
 if newPID == 0:
 	UDPConnections(CS_address,CS_port)
-
-#while 1:
-	#newPID = os.fork()
-	#if newPID == 0:
-		#break
 else:
 	BSSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BSSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-	while 1: 	
+	n = 0
+	while True: 	
 		serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		serverSocket.bind((CS_address, CS_port))
-		serverSocket.listen(2)	
+		serverSocket.listen(2)
 		(userSocket, client_address) = serverSocket.accept()
 		msgRecv = userSocket.recv(buffersize)
 		msgRecv = msgRecv.decode()
 
 		if AUTCommand(userSocket, msgRecv):
-
+			print("entrei aqui " + str(n))
 			msgRecv = msgRecv.split(' ')
 			Username = msgRecv[1]
 			Password = msgRecv[2].rstrip('\n')

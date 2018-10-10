@@ -27,33 +27,35 @@ buffersize = 256
 # ----------------------------------------------------------------------------------
 # BS-User TCP requests while cicle
 ## ----------------------------------------------------------------------------------
-while True
-	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	BS_Socket.bind((BS_address, BS_port))
-	BS_Socket.listen(5)
-	(User_Socket, User_address) = BS_Socket.accept()
-
-	msgRecv = User_Socket.recv(buffersize).decode()
-
-	if AUTCommand(msgRecv,User_Socket):
-
-		msgRecv = msgRecv.split(' ')
-		username = msgRecv[1]
+if newPID == 0:
+	while True:
+		
+		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		BS_Socket.bind((BS_address, BS_port))
+		BS_Socket.listen(5)
+		(User_Socket, User_address) = BS_Socket.accept()
 
 		msgRecv = User_Socket.recv(buffersize).decode()
-		msgSplit = msgRecv.split(' ')
 
-		if CMDMatcher(msgSplit[0],'^UPL$'):
-				UPLCommand(msgRecv,User_Socket)
+		if AUTCommand(msgRecv,User_Socket):
 
-		elif CMDMatcher(msgSplit[0],'^RSB$'):
-				RSBCommand(msgRecv,username,User_Socket)
-		else:
-			sendTCPError(CS_Socket,address,port)
-	
-	User_Socket.close()
-	BS_Socket.close()
+			msgRecv = msgRecv.split(' ')
+			username = msgRecv[1]
+
+			msgRecv = User_Socket.recv(buffersize).decode()
+			msgSplit = msgRecv.split(' ')
+
+			if CMDMatcher(msgSplit[0],'^UPL$'):
+					UPLCommand(msgRecv,User_Socket)
+
+			elif CMDMatcher(msgSplit[0],'^RSB$'):
+					RSBCommand(msgRecv,username,User_Socket)
+			else:
+				sendTCPError(CS_Socket,address,port)
+		
+		User_Socket.close()
+		BS_Socket.close()
 
 	
 
@@ -80,7 +82,7 @@ CS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 CS_Socket.bind((BS_address, BS_port))
 
 while 1:
-	(msgRecv, centralServer) = CS_Socket.recvfrom(1024) 
+	(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
 	msgRecv = msgRecv.decode()
 	msgRecv= msgRecv.split(' ')
 

@@ -37,7 +37,7 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 	print((msg, "this was a sent message"))
 	data = BS_Socket.recvfrom(256)
 	print((data, "this was a received message"))
-	socket.close()
+	BS_Socket.close()
 	return data
 	
 
@@ -45,6 +45,7 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 def UDPConnections(CS_address,CS_port):
 
 	while True:
+		print("ola")
 		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		BS_Socket.bind((CS_address, CS_port))	
@@ -67,6 +68,7 @@ def UDPConnections(CS_address,CS_port):
 			print(RGR_msg)
 		else:
 			RGR_msg+='NOK\n'
+		
 		BS_Socket.sendto(RGR_msg.encode(),(BS_Server[0],int(BS_Server[1])))
 			
 		BS_Socket.close()

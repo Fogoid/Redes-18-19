@@ -29,42 +29,49 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 	usernameDirectory = "user_"+username
 	BS_Server = ''
 	status = 'NOK'
+	
+	print("o que é isto?")
 
 	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\s'):
+		print('a')
 		splitedMsg = msgRecv.split(' ')
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
+			print('b')
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
 			file.close()
 			LSF_BS_msg += msgRecv[1]
-			filesKept = LSFCommand(BS_Socket, address, port, username)
+			filesKept = LSFCommand(BS_Socket, address, port, username, splitedMsg[1])
 			common = notCommon(splitedMsg[2:], filesKept[1:])
 			BKR_user_msg += len(common)
 			for string in common:
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
+			print('c')
 			BSconnection = getBS(username)
 			print(BSconnection)
-			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt').read():
+			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt', 'r').read():
+				print('d')
 				LSF_BS_msg += splitedMsg[1]
 				print(BSconnection)
 				address = BSconnection.split(' ')
 				status = 'OK\n'
-				print("cheguei aqui")
 			else:
+				print('e')
 				[address, port] = BSconnection.split(' ')
 				status = LSUCommand(BS_Socket, address, port, username, password)
 
 			if CMDMatcher(status, '^OK\n$'):
-				print('ola')
+				print('f')
 				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
 			else:
+				print('g')
 				BKR_user_msg += 'ERR\n'
 	else:
 		BKR_user_msg = 'ERR\n'
 
-	print(BKR_user_msg)
+	print(BKR_user_msg, "nao faço puto de ideia")
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
 

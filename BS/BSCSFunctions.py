@@ -12,10 +12,11 @@ def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 	
 	CS_Socket.sendto(register.encode(),(CS_address,CS_port))
 	while True: 
-		(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
-		if msgRecv:
+		(data, centralServer) = CS_Socket.recvfrom(1024)
+		if data:
 			break 
-	msgRecv = msgRecv.decode()
+	msgRecv = data.decode()
+	print((msgRecv, 'comecei com esta mensagem'))
 
 	CS_Socket.close()
 	if CMDMatcher(msgRecv, "^RGR OK\n$"):

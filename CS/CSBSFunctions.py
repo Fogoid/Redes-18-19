@@ -5,6 +5,7 @@ from CSBaseFunctions import *
 
 def LSFCommand(BSSocket, BSIP, BSport, username, dirname):
 	lsfMsg = 'LSF ' + username + ' ' + dirname + '\n'
+	print(("morro aqui?"))
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport, BSSocket)
 	splitedMsg = msgRecv.split(' ')
 	if CMDMatcher(msgRecv, '^LFD\s[0-9]\s'):
