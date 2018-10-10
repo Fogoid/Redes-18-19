@@ -21,8 +21,8 @@ def CMDMatcher(msg, pattern):
 
 def dateFormatter(date):
 	date = date.split(' ')
-	print(date)
-	newDate = str("%02d" % int(date[3])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[5] + ' ' + date[4]
+	newDate = str("%02d" % int(date[2])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[4] + ' ' + date[3]
+	print(newDate)
 	return newDate
 
 def sendMessage(mySocket, msgSent):
@@ -34,7 +34,7 @@ def recvMessage(mySocket, n):
 	if n:
 		msg = ''.encode()
 		while True:
-			data = mySocket.recv(8)
+			data = mySocket.recv(256)
 			if not data:
 				break
 			msg += data

@@ -34,13 +34,9 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	data = b''
-	while True:
-		data = BS_Socket.recv(1)
-		if not data:
-			break
-		msgRecv += data
+	data = BS_Socket.recv()
 	print(msgRecv)
-
+	
 
 #Cicle that keeps waiting for new BS's to register
 def UDPConnections(CS_address,CS_port):

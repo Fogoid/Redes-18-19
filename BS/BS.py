@@ -30,7 +30,7 @@ while newPID!=0:
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	BS_Socket.bind((BS_address, BS_port))
-	BS_Socket.listen(5)	
+	BS_Socket.listen(5)
 	(User_Socket, User_address) = BS_Socket.accept()
 
 	print(User_address)

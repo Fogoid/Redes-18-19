@@ -40,9 +40,10 @@ def UPLCommand(mySocket, directory, filesInfoList, username, password):
 	for n in range(1, int(filesInfoList[0])+1):
 		data = readFilesData(directory, filesInfoList[n*4 - 3], int(filesInfoList[n*4]))
 		fileInfo = filesInfoList[n*4-3] + ' ' + filesInfoList[n*4-2] + ' ' + filesInfoList[n*4-1] + ' ' + filesInfoList[n*4]
-		msgSent += b' ' + fileInfo.encode() + data
+		msgSent += b' ' + fileInfo.encode() + b' ' + data
 
-	print(msgSent)
+	msgSent += b'\n'
+
 	sendMessage(mySocket, msgSent)
 	uplRecv = recvMessage(mySocket, 0).split()
 

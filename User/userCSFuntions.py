@@ -64,8 +64,6 @@ def BCKCommand(mySocket, directory, username, password):
 
 	msgSent += str(filesNumber) + filesInfo + '\n'
 
-	print(msgSent)
-
 	sendMessage(mySocket, msgSent)
 	bckRecv = (recvMessage(mySocket, 1).decode()).split(' ')
 

@@ -24,38 +24,64 @@ def DLRCommand(username, userSocket):
 def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 
 	BKR_user_msg ='BKR '
-	LSU_BS_msg = 'LSU' + ' ' + username + ' ' + password
-	LSF_BS_msg = 'LSF ' + username
-	BKR_BS_msg = b''
 
 	usernameDirectory = "user_"+username
 	BS_Server = ''
+	status = 'NOK'
 
 	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\s'):
-		msgRecv = msgRecv.split(' ')
-		if os.path.exists('./' + usernameDirectory + '/' + msgRecv[1]):
-			file = open('./' + usernameDirectory + '/' + msgRecv[1] + '/IP_port.txt','r')
+		splitedMsg = msgRecv.split(' ')
+		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
+			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
 			file.close()
 			LSF_BS_msg += msgRecv[1]
-			BKR_user_msg += communicateUDP(LSU_BS_msg, address, port, BS_Socket) #FIXME: missing some arguments 
+			filesKept = LSFCommand(BS_Socket, address, port, username)
+			common = notCommon(splitedMsg[2:], filesKept[1:])
+			BKR_user_msg += len(common)
+			for string in common:
+				BKR_user_msg += ' ' + string
+			BKR_user_msg += '\n'
 		else:
 			BSconnection = getBS()
 			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt').read():
-				LSF_BS_msg += msgRecv[1]
+				LSF_BS_msg += splitedMsg[1]
 				[address, port] = BSconnection.split(' ')
-				BKR_user_msg += communicateUDP(LSF_BS_msg, address, port, BS_Socket) #FIXME: missing some arguments
+				status = 'OK'
 			else:
 				[address, port] = BSconnection.split(' ')
-				communicateUDP(LSU_BS_msg, address, port, BS_Socket) #FIXME: do next steps
+				status = LSUCommand(BS_Socket, address, port, username, password)
 
-
+			if CMDMatcher(status, '^OK\n$'):
+				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
+			else:
+				BKR_user_msg += 'ERR\n'
 	else:
 		BKR_user_msg = 'ERR\n'
 
 	print(BKR_user_msg)
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
+
+ #AUXILIARY FUNCTIONS
+def notCommon(list1, list2):
+	files1 = []
+	files2 = []
+
+	for i in range(0, int(list1[0])):
+		files1 += [' '.join(x for x in list1[i*4+1:i*4+5])]
+	for i in range(0, int(list2[0])):
+		files2 += [' '.join(x for x in list2[i*4+1:i*4+5])]
+	print(files1, files2)
+	return getNotCommon(files1, files2, [])
+
+def getNotCommon(list1, list2, notCommon):
+	if list1 == []:
+		return notCommon
+	elif not list1[0] in list2:
+		return getNotCommon(list1[1:], list2, notCommon + [list1[0]])
+	else:
+		return getNotCommon(list1[1:], list2, notCommon)
 
 def getBS(username):
 	file = open('./backupServers.txt', 'r')
