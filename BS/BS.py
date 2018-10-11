@@ -1,4 +1,4 @@
-import sys 
+import sys
 import socket
 import re
 import os
@@ -29,7 +29,7 @@ buffersize = 256
 ## ----------------------------------------------------------------------------------
 if newPID == 0:
 	while True:
-		
+
 		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		BS_Socket.bind((BS_address, BS_port))
@@ -53,11 +53,11 @@ if newPID == 0:
 					RSBCommand(msgRecv,username,User_Socket)
 			else:
 				sendTCPError(CS_Socket,address,port)
-		
+
 		User_Socket.close()
 		BS_Socket.close()
 
-	
+
 
 
 
@@ -85,6 +85,8 @@ while 1:
 	(msgRecv, centralServer) = CS_Socket.recvfrom(1024)
 	msgRecv = msgRecv.decode()
 	msgRecv= msgRecv.split(' ')
+	CS_address = centralServer[0]
+	CS_port = centralServer[1]
 
 	if CMDMatcher(msgRecv[0],'^LSF$'):
 				LFDCommand(msgRecv,CS_Socket,CS_address,CS_port)

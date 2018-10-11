@@ -1,4 +1,4 @@
-import sys 
+import sys
 import socket
 import json
 import os
@@ -18,7 +18,7 @@ if newPID == 0:
 else:
 	BSSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BSSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	n = 0
+
 	while True:
 
 		serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,7 +30,6 @@ else:
 		msgRecv = msgRecv.decode()
 
 		if AUTCommand(userSocket, msgRecv):
-			print("entrei aqui " + str(n))
 			msgRecv = msgRecv.split(' ')
 			Username = msgRecv[1]
 			Password = msgRecv[2].rstrip('\n')
@@ -64,4 +63,4 @@ else:
 				sendTCPMessage(userSocket, 'ERR\n')
 
 		serverSocket.close()
-		userSocket.close()	
+		userSocket.close()

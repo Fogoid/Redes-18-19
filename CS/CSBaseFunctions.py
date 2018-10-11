@@ -5,7 +5,7 @@ import socket
 import sys
 import argparse
 import os
-import shutil 
+import shutil
 
 def getConnectionDetails():
 
@@ -33,16 +33,16 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
-	data = b''
-	UDPmsg = b''
+	data = ''
+	UDPmsg = ''
 	while True:
-		data = BS_Socket.recvfrom(1024)
+		(data,BS_address) = BS_Socket.recvfrom(1024)
 		if not data:
 			break
-		UDPmsg += data
+		UDPmsg += str(data[0])
 	BS_Socket.close()
 	return UDPmsg
-	
+
 
 #Cicle that keeps waiting for new BS's to register
 def UDPConnections(CS_address,CS_port):
@@ -50,31 +50,30 @@ def UDPConnections(CS_address,CS_port):
 	while True:
 		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		BS_Socket.bind((CS_address, CS_port))	
-		
-		BS_Server = ''	
+		BS_Socket.bind((CS_address, CS_port))
+
+		BS_Server = ''
 		msgRecv = b''
 
 		while not msgRecv != b'':
 			(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
 
 		msgRecv = msgRecv.decode().split(' ')
-		print(msgRecv, "UDP CONNECTIONS TEM O ERRO, TEMOS DE DIFERENCIAR OS DOIS UDPS MAS NÃO SEI COMO")
 		RGR_msg = 'RGR '
 
 		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
 			print('ola')
 			file = open('backupServers.txt','ab+')
-			print(msgRecv[1] + ' ' + msgRecv[2])
-			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
+			print(str(BS_Server[1])+' '+msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
+			file.write((str(BS_Server[1])+' '+msgRecv[1] + ' '+ msgRecv[2]).encode())
 			file.close()
 			RGR_msg+='OK\n'
 			print(RGR_msg)
 		else:
 			RGR_msg+='NOK\n'
-		
+
 		BS_Socket.sendto(RGR_msg.encode(),(BS_Server[0],int(BS_Server[1])))
-			
+
 		BS_Socket.close()
 
 	return 0
@@ -102,8 +101,8 @@ def AUTCommand(userSocket, message):
 			with open(datafile,'w') as file:
 				file.write(password)
 			os.makedirs('user_'+message[1])
-			file = open('user_'+message[1]+'/'+'BS_Register.txt','w') 
-			file.close()	
+			file = open('user_'+message[1]+'/'+'BS_Register.txt','w')
+			file.close()
 			autMsg += 'NEW\n'
 	else:
 		autMsg = 'ERR\n'

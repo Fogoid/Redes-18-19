@@ -29,14 +29,10 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 	usernameDirectory = "user_"+username
 	BS_Server = ''
 	status = 'NOK'
-	
-	print("o que é isto?")
 
-	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\s'):
-		print('a')
+	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\n'):
 		splitedMsg = msgRecv.split(' ')
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
-			print('b')
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
 			file.close()
@@ -48,30 +44,27 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
-			print('c')
 			BSconnection = getBS(username)
 			print(BSconnection)
-			if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt', 'r').read():
-				print('d')
-				LSF_BS_msg += splitedMsg[1]
-				print(BSconnection)
-				address = BSconnection.split(' ')
-				status = 'OK\n'
+			if os.path.exists('./' + usernameDirectory + '/BS_Register.txt'):
+				if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt', 'r').read():
+					LSF_BS_msg += splitedMsg[1]
+					print(BSconnection)
+					address = BSconnection.split(' ')
+					status = 'OK\n'
 			else:
-				print('e')
-				[address, port] = BSconnection.split(' ')
-				status = LSUCommand(BS_Socket, address, port, username, password)
+				with open('./' + usernameDirectory + '/BS_Register.txt', 'w') as file:
+					file.write(BSconnection)
+					[port, address,user_port] = BSconnection.split(' ')
+					status = LSUCommand(BS_Socket, address, port, username, password)
 
 			if CMDMatcher(status, '^OK\n$'):
-				print('f')
 				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
 			else:
-				print('g')
 				BKR_user_msg += 'ERR\n'
 	else:
 		BKR_user_msg = 'ERR\n'
 
-	print(BKR_user_msg, "nao faço puto de ideia")
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
 
@@ -101,8 +94,8 @@ def getBS(username):
 	print(msg, "this is in the file")
 	#FIXME for more BS
 	file.close()
-	
-	return msg 
+
+	return msg
 
 def RSRCommand(msgRecv, username, userSocket):
 
