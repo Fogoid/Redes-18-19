@@ -13,7 +13,7 @@ global exit
 (BS_port, CS_addressName, CS_port) = getConnectionDetails()
 CS_address = socket.gethostbyname(CS_addressName)
 BS_address = socket.gethostbyname('localhost')
-CS_Start_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+CS_Start_Socket = UDPSocket()
 exit = startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
 
 
@@ -30,8 +30,7 @@ buffersize = 256
 if newPID == 0:
 	while True:
 
-		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		BS_Socket = TCPSocket()
 		BS_Socket.bind((BS_address, BS_port))
 		BS_Socket.listen(5)
 		(User_Socket, User_address) = BS_Socket.accept()
@@ -52,7 +51,7 @@ if newPID == 0:
 			elif CMDMatcher(msgSplit[0],'^RSB$'):
 					RSBCommand(msgRecv,username,User_Socket)
 			else:
-				sendTCPError(CS_Socket,address,port)
+				sendTCPError(User_Socket,address,port)
 
 		User_Socket.close()
 		BS_Socket.close()
@@ -77,8 +76,7 @@ if newPID == 0:
 # BS-CS UDP requests while cicle
 # ----------------------------------------------------------------------------------
 
-CS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-CS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+CS_Socket = UDPSocket()
 CS_Socket.bind((BS_address, BS_port))
 
 while 1:

@@ -5,6 +5,27 @@ import re
 import os
 import time
 
+
+#Try catches for initializing a TCP socket
+def TCPSocket():
+		try:
+			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		except socket.error as e:
+			print ('Error creating socket: '+ e + '\nTerminating Process')
+			sys.exit(1)
+		return TCP_Socket
+
+#Try catches for initializing a UDP socket
+def UDPSocket():
+	try:
+		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	except socket.error as e:
+		print ('Error creating socket: '+ e + '\nTerminating Process')
+		sys.exit(1)
+	return UDP_Socket
+
 def getConnectionDetails():
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Gives the name of the address do connect')
@@ -12,7 +33,7 @@ def getConnectionDetails():
 
 	connectionDetails = parser.parse_args()
 	return (connectionDetails.n, connectionDetails.p)
-	
+
 def CMDMatcher(msg, pattern):
 	matcher = re.compile(pattern)
 	if matcher.match(msg):
@@ -40,13 +61,16 @@ def recvMessage(mySocket, n):
 			msg += data
 	else:
 		msg = mySocket.recv(128).decode()
-		
+
 	print((msg, "this was a received message"))
 	return msg
 
 def readFilesData(directory, filename, size):
 	data = b''
-	file = open('./' + directory + '/' + filename, 'rb')
+	try:
+		file = open('./' + directory + '/' + filename, 'rb')
+	except (OSError, IOError) as e:
+		print('Error reading the file:'+filename+' '+e[0]+' '+e[1]+'\n')
 	data = file.read(size)
 
 	return data
@@ -56,7 +80,7 @@ def writeFileData(file, dataList, i):
 	size = int(dataList[i+3].decode())
 	i += 4
 	data = dataList[i]
-	
+
 	while len(data) != size:
 		i += 1
 		data += b' ' + dataList[i]
@@ -72,9 +96,9 @@ def getFileDetails(filename, directory):
 
 def authenticateUser(mySocket):
 
-	while True: 
+	while True:
 		userLogin = input()
-		
+
 		if(CMDMatcher(userLogin,'^login\s[0-9]{5}\s[0-9 a-z]{8}$')):
 
 			(cmd, username, password) = userLogin.split(' ')
@@ -84,7 +108,7 @@ def authenticateUser(mySocket):
 			if status == 'OK\n':
 				print("User login successful")
 			elif status == 'NOK\n':
-				print("Wrong password") 
+				print("Wrong password")
 				continue
 			else:
 				print("A new user was created with your credentials")
@@ -98,15 +122,14 @@ def authenticateUser(mySocket):
 
 #Prepares the username and password for the server protocol in order to authenticate the user
 def AUTCommand(mySocket, username, password):
-	
-	msgSent = "AUT " + username + " " + password + "\n" 
+
+	msgSent = "AUT " + username + " " + password + "\n"
 	autRecv = ''
 
 	sendMessage(mySocket, msgSent)
-	
+
 	autRecv = recvMessage(mySocket, 0).split(' ')
 
 	if CMDMatcher(autRecv[0], "^AUR$"):
 		status = autRecv[1]
 		return status
-

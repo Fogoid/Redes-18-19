@@ -6,6 +6,27 @@ import os
 import time
 from shutil import rmtree
 
+
+#Try catches for initializing a TCP socket
+def TCPSocket():
+		try:
+			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		except socket.error as e:
+			print ('Error creating socket: '+ e + '\nTerminating Process')
+			sys.exit(1)
+		return TCP_Socket
+
+#Try catches for initializing a UDP socket
+def UDPSocket():
+	try:
+		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	except socket.error as e:
+		print ('Error creating socket: '+ e + '\nTerminating Process')
+		sys.exit(1)
+	return UDP_Socket
+
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
@@ -29,7 +50,7 @@ def dateFormatter(date):
 	newDate = str("%02d" % int(date[2])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[4] + ' ' + date[3]
 	return newDate
 
-#Function gets all data from a file 
+#Function gets all data from a file
 def readFileData(directory, filename, size):
 	data = b''
 	file = open('./' + directory + '/' + filename, 'rb')
@@ -43,7 +64,7 @@ def writeFileData(file, dataList, i):
 	size = int(dataList[i+3].decode())
 	i += 4
 	data = dataList[i]
-	
+
 	while len(data) != size:
 		i += 1
 		data += b' ' + dataList[i]

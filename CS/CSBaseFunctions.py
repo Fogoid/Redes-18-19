@@ -7,6 +7,27 @@ import argparse
 import os
 import shutil
 
+
+#Try catches for initializing a TCP socket
+def TCPSocket():
+		try:
+			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		except socket.error as e:
+			print ('Error creating socket: '+ e + '\nTerminating Process')
+			sys.exit(1)
+		return TCP_Socket
+
+#Try catches for initializing a UDP socket
+def UDPSocket():
+	try:
+		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	except socket.error as e:
+		print ('Error creating socket: '+ e + '\nTerminating Process')
+		sys.exit(1)
+	return UDP_Socket
+
 def getConnectionDetails():
 
 	parser = argparse.ArgumentParser(description='Get connection details')
@@ -29,9 +50,8 @@ def sendTCPMessage(userSocket, msg):
 	userSocket.send(msg)
 
 #Simple function that communicates in TCP
-def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
-	BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+def communicateUDP(msg, BS_IP, BS_Port):
+	BS_Socket = UDPSocket()
 	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	data = ''
 	UDPmsg = ''
@@ -48,8 +68,7 @@ def communicateUDP(msg, BS_IP, BS_Port, BS_Socket):
 def UDPConnections(CS_address,CS_port):
 
 	while True:
-		BS_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		BS_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		BS_Socket = UDPSocket()
 		BS_Socket.bind((CS_address, CS_port))
 
 		BS_Server = ''
@@ -62,13 +81,11 @@ def UDPConnections(CS_address,CS_port):
 		RGR_msg = 'RGR '
 
 		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
-			print('ola')
 			file = open('backupServers.txt','ab+')
-			print(msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
+			print('BS '+'RGR '+msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
 			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
 			file.close()
 			RGR_msg+='OK\n'
-			print(RGR_msg)
 		else:
 			RGR_msg+='NOK\n'
 

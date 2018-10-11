@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-import sys 
+import sys
 import socket
 import re
 from userBaseFunctions import *
@@ -20,18 +20,18 @@ while not exit:
 		cmd = cmd.split(' ')
 
 	#Creates a socket with a given protocol to establish a connection
-	mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	mySocket = TCPSocket()
 
 	if not loggedIn:
 		mySocket.connect((address, port))
-		
+
 		(userName, userPassword, exit) = authenticateUser(mySocket)
 
 		loggedIn = 1
 
 		mySocket.close()
 		continue
-		
+
 	else:
 		if not (CMDMatcher(cmd[0], '^logout$') or CMDMatcher(cmd[0],'^exit$')):
 			mySocket.connect((address, port))
@@ -63,7 +63,7 @@ while not exit:
 
 	elif CMDMatcher(cmd[0], '^logout$'):
 		loggedIn = 0
-	
+
 	elif CMDMatcher(cmd[0],'^exit$'):
 	 	exit = 1
 

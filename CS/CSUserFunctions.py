@@ -22,7 +22,7 @@ def DLRCommand(username, userSocket):
 	sendTCPMessage(userSocket, dlrMsg)
 	return 0
 
-def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
+def BKRCommand(msgRecv, username, password, userSocket):
 
 	BKR_user_msg ='BKR '
 	LSF_BS_msg = ''
@@ -30,14 +30,15 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 	BS_Server = ''
 	status = 'NOK'
 
-	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\n'):
+	print(msgRecv)
+	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s'):
 		splitedMsg = msgRecv.split(' ')
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
 			file.close()
 			LSF_BS_msg += msgRecv[1]
-			filesKept = LSFCommand(BS_Socket, address, port, username, splitedMsg[1])
+			filesKept = LSFCommand(address, port, username, splitedMsg[1])
 			common = notCommon(splitedMsg[2:], filesKept[1:])
 			BKR_user_msg += len(common)
 			for string in common:
@@ -91,7 +92,6 @@ def getNotCommon(list1, list2, notCommon):
 def getBS(username):
 	file = open('./backupServers.txt', 'r')
 	msg = file.readline()
-	print(msg, "this is in the file")
 	#FIXME for more BS
 	file.close()
 
@@ -133,13 +133,12 @@ def LDRCommand(username, userSocket):
 	sendTCPMessage(userSocket, ldrMsg)
 	return 0
 
-def LFDCommand(msgRecv, username, userSocket, BSSocket):
+def LFDCommand(msgRecv, username, userSocket):
 	lfdMsg='LFD '
 	usernameDirectory = "user_" + username
 	msgRecv = msgRecv.split(' ')
 	BS_Server = []
 	if CMDMatcher(msgRecv[0], '^LSF$') and len(msgRecv) < 3:
-		print('ola?')
 		existsInBS = 0
 		msgRecv[1] = msgRecv[1].rstrip('\n')
 		if os.path.exists(usernameDirectory + '/' + msgRecv[1]):
