@@ -9,7 +9,7 @@ def LSFCommand(BSSocket, BSIP, BSport, username, dirname):
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport)
 	splitedMsg = msgRecv.split(' ')
 	print('dkjwnadjkwnadna')
-	print(splitedMsg)			
+	print(splitedMsg)
 	if CMDMatcher(splitedMsg[0], '^LFD$'):
 		print(len(splitedMsg[2:]))
 		if len(splitedMsg[2:]) == 4*int(splitedMsg[1]):
@@ -22,7 +22,7 @@ def LSUCommand(BS_IP, BS_port, username, password):
 	msgRecv = communicateUDP(lsuMsg, BS_IP, BS_port)
 	print(("LSU received this msg:", msgRecv))
 	splitedMsg = msgRecv.split(' ')
-	if CMDMatcher(msgRecv, '^LUR\s[A-Z]\n$'):
+	if CMDMatcher(splitedMsg[0], '^LUR$'):
 		return splitedMsg[1]
 	elif CMDMatcher(msgRecv, '^ERR\n$'):
 		return 'ERR'

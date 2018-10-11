@@ -31,8 +31,10 @@ def BKRCommand(msgRecv, username, password, userSocket):
 	status = 'NOK'
 
 	print(msgRecv)
-	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s'):
-		splitedMsg = msgRecv.split(' ')
+	print("dont i receive the whole thing?")
+	splitedMsg = msgRecv.split(' ')
+
+	if CMDMatcher(splitedMsg[0], '^BCK$'):
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
@@ -57,7 +59,7 @@ def BKRCommand(msgRecv, username, password, userSocket):
 				with open('./' + usernameDirectory + '/BS_Register.txt', 'w') as file:
 					file.write(BSconnection)
 					[address,port] = BSconnection.split(' ')
-					status = LSUCommand(BS_Socket, address, port, username, password)
+					status = LSUCommand(address, port, username, password)
 
 			if CMDMatcher(status, '^OK\n$'):
 				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
@@ -66,6 +68,7 @@ def BKRCommand(msgRecv, username, password, userSocket):
 	else:
 		BKR_user_msg = 'ERR\n'
 
+	print(BKR_user_msg)
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
 

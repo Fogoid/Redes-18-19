@@ -6,10 +6,10 @@ import sys
 import socket
 
 def LSDCommand(mySocket):
-	
+
 	msgSent = "LSD\n"
 	lsdRecv = ''
-	
+
 	sendMessage(mySocket, msgSent)
 	lsdRecv = ((recvMessage(mySocket, 1)).decode()).split(' ')
 
@@ -29,14 +29,15 @@ def LSFCommand(mySocket, directory): #finish me later
 	lsfRecv = (recvMessage(mySocket, 1).decode()).split(' ')
 	print(lsfRecv)
 	if CMDMatcher(lsfRecv[0], '^LFD$'):
+		print(lsfRecv)
 		msg = "Backup server ip: " + lsfRecv[1] + "\nBackup server port: " + lsfRecv[2] + "\nFiles stored: " + lsfRecv[3] + "\n"
 		for n in range(1, int(lsfRecv[3])+1):
-			msg += lsfRecv[3*n+1] + ' ' + lsfRecv[3*n+2] + ' '
+			msg += lsfRecv[3*n+1] + ' ' + lsfRecv[3*n+2] + ' ' + lsfRecv[3*n+3] + lsfRecv[3*n + 4]
 		print(msg)
 
 #The command that processes the Delete user request
 def DLUCommand(mySocket):
-		
+
 	msgSent = 'DLU\n'
 	dluRecv = ''
 
@@ -63,7 +64,7 @@ def BCKCommand(mySocket, directory, username, password):
 			filesNumber += 1
 
 	msgSent += str(filesNumber) + filesInfo + '\n'
-
+	print(msgSent)
 	sendMessage(mySocket, msgSent)
 	bckRecv = (recvMessage(mySocket, 1).decode()).split(' ')
 

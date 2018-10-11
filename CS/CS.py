@@ -35,7 +35,15 @@ else:
 			Password = msgRecv[2].rstrip('\n')
 			print(Username+' '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
-			msgRecv = userSocket.recv(buffersize)
+			msgRecv = b''
+			while True:
+				data = userSocket.recv(buffersize)
+				print(data)
+				if data[-1:] == b'\n' or not data:
+					msgRecv += data
+					break
+				msgRecv += data
+
 			msgRecv = msgRecv.decode()
 			msgSplit = msgRecv.split(' ')
 			if msgRecv!='':
@@ -45,7 +53,7 @@ else:
 				DLRCommand(Username,userSocket)
 
 			elif CMDMatcher(msgSplit[0],'^BCK$'):
-				BKRCommand(msgRecv,Username,Password,userSocket,BSSocket)
+				BKRCommand(msgRecv,Username,Password,userSocket)
 
 			elif CMDMatcher(msgSplit[0],'^RST$'):
 				RSRCommand(msgRecv,Username,userSocket)
