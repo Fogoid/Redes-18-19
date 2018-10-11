@@ -30,7 +30,7 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 	BS_Server = ''
 	status = 'NOK'
 
-	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\s[0-9]+\n'):
+	if CMDMatcher(msgRecv, '^BCK\s[a-z]+\n'):
 		splitedMsg = msgRecv.split(' ')
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
@@ -55,7 +55,7 @@ def BKRCommand(msgRecv, username, password, userSocket, BS_Socket):
 			else:
 				with open('./' + usernameDirectory + '/BS_Register.txt', 'w') as file:
 					file.write(BSconnection)
-					[port, address,user_port] = BSconnection.split(' ')
+					[address,port] = BSconnection.split(' ')
 					status = LSUCommand(BS_Socket, address, port, username, password)
 
 			if CMDMatcher(status, '^OK\n$'):

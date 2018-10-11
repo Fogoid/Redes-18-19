@@ -64,8 +64,8 @@ def UDPConnections(CS_address,CS_port):
 		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
 			print('ola')
 			file = open('backupServers.txt','ab+')
-			print(str(BS_Server[1])+' '+msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
-			file.write((str(BS_Server[1])+' '+msgRecv[1] + ' '+ msgRecv[2]).encode())
+			print(msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
+			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
 			file.close()
 			RGR_msg+='OK\n'
 			print(RGR_msg)
