@@ -3,11 +3,16 @@ import sys
 import os
 from CSBaseFunctions import *
 
-def LSFCommand(BSIP, BSport, username, dirname):
+def LSFCommand(BSSocket, BSIP, BSport, username, dirname):
 	lsfMsg = 'LSF ' + username + ' ' + dirname + '\n'
+	print("ola")
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport)
+	splitedMsg = msgRecv.split(' ')
+	print('dkjwnadjkwnadna')
+	print(splitedMsg)			
 	if CMDMatcher(splitedMsg[0], '^LFD$'):
-		if len(splitedMsg[2:]) == 4*splitedMsg[1]:
+		print(len(splitedMsg[2:]))
+		if len(splitedMsg[2:]) == 4*int(splitedMsg[1]):
 			return msgRecv[4:]
 	elif CMDMatcher(msgRecv, '^ERR$'):
 		return 'ERR'

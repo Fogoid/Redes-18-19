@@ -36,6 +36,7 @@ def LFDCommand(msgRecv, CS_Socket, address, port):
 	lfdMsg = b'LFD '
 	directory = msgRecv[2].rstrip('\n')
 	lfdMsg += readDirectory(msgRecv[1], directory)
+	print(lfdMsg)
 
 	sendUDPMessage(lfdMsg, CS_Socket, address, port)
 	return 0

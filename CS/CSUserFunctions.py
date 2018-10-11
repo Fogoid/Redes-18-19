@@ -133,7 +133,7 @@ def LDRCommand(username, userSocket):
 	sendTCPMessage(userSocket, ldrMsg)
 	return 0
 
-def LFDCommand(msgRecv, username, userSocket):
+def LFDCommand(msgRecv, username, userSocket, BSSocket):
 	lfdMsg='LFD '
 	usernameDirectory = "user_" + username
 	msgRecv = msgRecv.split(' ')
@@ -148,7 +148,8 @@ def LFDCommand(msgRecv, username, userSocket):
 				BS_Server.append(bs_data[1])
 			lfdMsg += BS_Server[0] + ' '
 			lfdMsg += BS_Server[1] + ' '
-			LSFCommand(BSSocket, BS_Server[0], BS_Server[1], username, msgRecv[1])
+			lfdMsg += LSFCommand(BSSocket, BS_Server[0], BS_Server[1], username, msgRecv[1])
+			print(lfdMsg)
 	else:
 		lfdMsg='ERR\n'
 

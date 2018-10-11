@@ -27,11 +27,11 @@ def LSFCommand(mySocket, directory): #finish me later
 	sendMessage(mySocket, msgSent)
 
 	lsfRecv = (recvMessage(mySocket, 1).decode()).split(' ')
-
+	print(lsfRecv)
 	if CMDMatcher(lsfRecv[0], '^LFD$'):
 		msg = "Backup server ip: " + lsfRecv[1] + "\nBackup server port: " + lsfRecv[2] + "\nFiles stored: " + lsfRecv[3] + "\n"
-		for n in range(1, lsfRecv[3]+1):
-			msg += lsfRecv[3*n+1:3*n+3]
+		for n in range(1, int(lsfRecv[3])+1):
+			msg += lsfRecv[3*n+1] + ' ' + lsfRecv[3*n+2] + ' '
 		print(msg)
 
 #The command that processes the Delete user request

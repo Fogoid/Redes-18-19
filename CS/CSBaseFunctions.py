@@ -55,11 +55,8 @@ def communicateUDP(msg, BS_IP, BS_Port):
 	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	data = ''
 	UDPmsg = ''
-	while True:
-		(data,BS_address) = BS_Socket.recvfrom(1024)
-		if not data:
-			break
-		UDPmsg += str(data[0])
+	(UDPmsg,BS_address) = BS_Socket.recvfrom(1024)
+	UDPmsg = UDPmsg.decode()
 	BS_Socket.close()
 	return UDPmsg
 
@@ -77,6 +74,7 @@ def UDPConnections(CS_address,CS_port):
 		while not msgRecv != b'':
 			(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
 
+		print(msgRecv, 'dwkndakda')
 		msgRecv = msgRecv.decode().split(' ')
 		RGR_msg = 'RGR '
 
