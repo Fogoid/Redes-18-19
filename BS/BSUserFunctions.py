@@ -6,7 +6,7 @@ from BSBaseFunctions import *
 
 def UPRCommand(message, username, userSocket):
 	uprMsg = 'UPR '
-
+	print(message)
 	if CMDMatcher(message, '^UPL\s[a-z]+[0-9]+\s'):
 		if not os.path.exists(directory):
 				os.makedirs(directory)

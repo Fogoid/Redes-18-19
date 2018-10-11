@@ -80,7 +80,7 @@ def BCKCommand(mySocket, directory, username, password):
 
 			mySocket.connect((bckRecv[1], int(bckRecv[2])))
 
-			UPLCommand(mySocket, directory, bckRecv[3:], username, password)
+			UPLCommand(mySocket, directory, bckRecv[2:], username, password)
 
 def DELCommand(mySocket, directory):
 	msgSent = "DEL " + directory + '\n'

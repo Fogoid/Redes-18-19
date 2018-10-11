@@ -35,6 +35,7 @@ def UPLCommand(mySocket, directory, filesInfoList, username, password):
 	msgSent = 'UPL ' + directory + ' ' + filesInfoList[0]
 	msgSent = msgSent.encode()
 	data = b''
+	print(filesInfoList[0])
 	AUTCommand(mySocket, username, password)
 
 	for n in range(1, int(filesInfoList[0])+1):
@@ -45,7 +46,7 @@ def UPLCommand(mySocket, directory, filesInfoList, username, password):
 	msgSent += b'\n'
 
 	sendMessage(mySocket, msgSent)
-	uplRecv = recvMessage(mySocket, 0).split()
+	uplRecv = recvMessage(mySocket, 0).split(' ')
 
 	if CMDMatcher(uplRecv[0], '^UPR$'):
 		if CMDMatcher(uplRecv[1], '^OK$'):

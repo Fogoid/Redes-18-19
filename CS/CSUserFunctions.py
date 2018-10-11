@@ -47,22 +47,30 @@ def BKRCommand(msgRecv, username, password, userSocket):
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
-			BSconnection = getBS(username)
-			print(BSconnection)
-			if os.path.exists('./' + usernameDirectory + '/BS_Register.txt'):
-				if BSconnection in open('./' + usernameDirectory + '/BS_Register.txt', 'r').read():
-					LSF_BS_msg += splitedMsg[1]
-					print(BSconnection)
-					address = BSconnection.split(' ')
-					status = 'OK\n'
-			else:
-				with open('./' + usernameDirectory + '/BS_Register.txt', 'w') as file:
-					file.write(BSconnection)
-					[address,port] = BSconnection.split(' ')
-					status = LSUCommand(address, port, username, password)
+			BSconnection = getBS()
+			[BSIP, BSport] = BSconnection.split(' ')
+			file = open('./' + usernameDirectory + '/BS_Register.txt')
+			while True:
+				if file.readline() == BSconnection:
+					status = "OK\n"
+					break
+				elif file.readline() == '':
+					status = LSUCommand(BSIP, BSport, username, password)
+					break
+			file.close()
+
+			if not os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
+				os.makedirs('./' + usernameDirectory + '/' + splitedMsg[1])
+			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt', 'w')
+			file.write(BSconnection.strip('\n'))
+			file.close()
+			
+			file = open('./' + usernameDirectory + '/BS_Register.txt', 'w')
+			file.write(BSconnection.strip('\n'))
+			file.close()
 
 			if CMDMatcher(status, '^OK\n$'):
-				BKR_user_msg += BSconnection + ' ' + ' '.join(splitedMsg[3:])
+				BKR_user_msg += BSconnection.strip('\n') + ' ' + ' '.join(splitedMsg[3:])
 			else:
 				BKR_user_msg += 'ERR\n'
 	else:
@@ -92,7 +100,7 @@ def getNotCommon(list1, list2, notCommon):
 	else:
 		return getNotCommon(list1[1:], list2, notCommon)
 
-def getBS(username):
+def getBS():
 	file = open('./backupServers.txt', 'r')
 	msg = file.readline()
 	#FIXME for more BS
