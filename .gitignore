@@ -32,3 +32,14 @@ BS/user_99999.txt.txt
 BS/__pycache__/BSUserFunctions.cpython-35.pyc
 BS/__pycache__/BSCSFunctions.cpython-35.pyc
 BS/__pycache__/BSBaseFunctions.cpython-35.pyc
+User/planes/white-plane-sky.jpg
+User/planes/emirates.png
+User/planes/airbus-321-neo.jpg
+CS/user_12345/planes/IP_port.txt
+CS/user_12345/BS_Register.txt
+CS/user_12345.txt
+BS/user_12345/planes/white-plane-sky.jpg
+BS/user_12345/planes/emirates.png
+BS/user_12345/planes/electricplane.jpg
+BS/user_12345/planes/airbus-321-neo.jpg
+BS/user_12345.txt

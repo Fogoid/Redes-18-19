@@ -9,16 +9,19 @@ def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 	register = 'REG ' + BS_address + ' ' + str(BS_port)+'\n'
 	msgRecv = ""
 	centralServer = ''
-	
+	print(register)
 	CS_Socket.sendto(register.encode(),(CS_address,CS_port))
+
 	while True: 
 		(data, centralServer) = CS_Socket.recvfrom(1024)
 		if data:
 			break 
 	msgRecv = data.decode()
+	
 	print((msgRecv, 'comecei com esta mensagem'))
 
 	CS_Socket.close()
+
 	if CMDMatcher(msgRecv, "^RGR OK\n$"):
 		return 1
 
@@ -30,9 +33,9 @@ def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 
 #Responsible for handling the LSF (listfile dir) request
 def LFDCommand(msgRecv, CS_Socket, address, port):
-	lfdMsg = 'LFD '
+	lfdMsg = b'LFD '
 	directory = msgRecv[2].rstrip('\n')
-	lfdMsg += readDirectoryFiles(msgRecv[1], directory)
+	lfdMsg += readDirectory(msgRecv[1], directory)
 
 	sendUDPMessage(lfdMsg, CS_Socket, address, port)
 	return 0

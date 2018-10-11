@@ -19,7 +19,8 @@ else:
 	BSSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	BSSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	n = 0
-	while True: 	
+	while True:
+
 		serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		serverSocket.bind((CS_address, CS_port))
@@ -54,7 +55,7 @@ else:
 				LDRCommand(Username,userSocket)
 
 			elif CMDMatcher(msgSplit[0],'^LSF$'):
-				LFDCommand(msgRecv,Username,userSocket)
+				LFDCommand(msgRecv,Username,userSocket, BSSocket)
 
 			elif CMDMatcher(msgSplit[0],'^DEL$'):
 				DDRCommand(msgRecv,Username,userSocket)

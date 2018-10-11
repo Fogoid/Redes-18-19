@@ -140,24 +140,27 @@ def LDRCommand(username, userSocket):
 	sendTCPMessage(userSocket, ldrMsg)
 	return 0
 
-def LFDCommand(msgRecv, username, userSocket):
+def LFDCommand(msgRecv, username, userSocket, BSSocket):
 	lfdMsg='LFD '
 	usernameDirectory = "user_" + username
-
-	if CMDMatcher(msgRecv, '^LSF\s[a-z]+\n$'):
-		msgRecv=msgRecv.split(' ')
+	msgRecv = msgRecv.split(' ')
+	BS_Server = []
+	if CMDMatcher(msgRecv[0], '^LSF$') and len(msgRecv) < 3:
+		print('ola?')
+		existsInBS = 0
 		msgRecv[1] = msgRecv[1].rstrip('\n')
 		if os.path.exists(usernameDirectory + '/' + msgRecv[1]):
 			with open(usernameDirectory+'/'+msgRecv[1]+'/'+'IP_port.txt','r') as file:
 				bs_data = file.readline().split(' ')
 				BS_Server.append(bs_data[0])
 				BS_Server.append(bs_data[1])
-			lfdMsg += BS_Server[0]+' '
-			lfdMsg += BS_Server[1]+' '
+			lfdMsg += BS_Server[0] + ' '
+			lfdMsg += BS_Server[1] + ' '
+			LSFCommand(BSSocket, BS_Server[0], BS_Server[1], username, msgRecv[1])
 	else:
 		lfdMsg='ERR\n'
 
-	sendTCPMessage(lfdMsg, userSocket)
+	sendTCPMessage(userSocket, lfdMsg)
 	return 0
 
 def DDRCommand(msgRecv,username,userSocket):

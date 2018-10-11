@@ -14,7 +14,6 @@ def getConnectionDetails():
 	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Port from CS where the BS will connect to')
 
 	connectionDetails = parser.parse_args()
-	print((connectionDetails.b,connectionDetails.n,connectionDetails.p))
 	return (connectionDetails.b,connectionDetails.n, connectionDetails.p)
 
 #General regex command matcher
@@ -27,7 +26,6 @@ def CMDMatcher(msg, pattern):
 #Simple function that puts the date in the right format
 def dateFormatter(date):
 	date = date.split(' ')
-	print(date)
 	newDate = str("%02d" % int(date[2])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[4] + ' ' + date[3]
 	return newDate
 
@@ -59,11 +57,11 @@ def readDirectory(username, directory):
 	msg = b''
 
 	for (dirpath, dirnames, files) in os.walk("./" + usernameDirectory + '/' + directory):
-		msg += str(len(files))
+		msg += str(len(files)).encode()
 		for filename in files:
 			size = os.path.getsize(usernameDirectory+'/'+directory + '/'+filename)
 			date = dateFormatter(time.ctime(os.path.getmtime(usernameDirectory+'/'+directory + '/' + filename)))
-			msg += ' ' + filename + ' ' + date + ' ' + str(size)
+			msg += b' ' + filename.encode() + b' ' + date.encode() + b' ' + str(size).encode()
 		msg += b'\n'
 	return msg
 
@@ -107,6 +105,7 @@ def verifyUser(message):
 
 #Simple function that sends a UDP message
 def sendUDPMessage(message,CS_Socket,address,port):
-	message = ''.join(message)
-	CS_Socket.sendto(message.encode(),(address,port))
+	if not isinstance(message, bytes):
+		message = message.encode()
+	CS_Socket.sendto(message,(address,port))
 	return 1

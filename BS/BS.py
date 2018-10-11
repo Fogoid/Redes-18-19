@@ -86,9 +86,6 @@ while 1:
 	msgRecv = msgRecv.decode()
 	msgRecv= msgRecv.split(' ')
 
-	print((msgRecv, "this was a received msg"))
-	print(exit)
-
 	if CMDMatcher(msgRecv[0],'^LSF$'):
 				LFDCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
