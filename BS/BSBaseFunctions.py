@@ -53,9 +53,14 @@ def dateFormatter(date):
 #Function gets all data from a file
 def readFileData(directory, filename, size):
 	data = b''
-	file = open('./' + directory + '/' + filename, 'rb')
-	data = file.read(size)
-	file.close()
+
+	try:
+		file = open('./' + directory + '/' + filename, 'rb')
+		data = file.read(size)
+		file.close()
+	except (OSError, IOError) as e:
+		print('Error reading the file:'+filename+'\n')
+	
 
 	return data
 
@@ -89,9 +94,15 @@ def readDirectory(username, directory):
 
 #Simple function that sends the specified message through TCP
 def sendTCPMessage(User_Socket, msg):
-	if not isinstance(msg, bytes):
-		msg = msg.encode()
-	User_Socket.sendall(msg)
+	try:
+		if not isinstance(msg, bytes):
+			msg = msg.encode()
+		User_Socket.sendall(msg)
+	except socket.error as e:
+		print ('Error sending message from TCPSocket to User \nTerminating Process')
+		sys.exit(1)
+	return 1
+
 
 #Sends a 'ERR' message
 def sendTCPError(User_Socket,msg):
@@ -126,7 +137,11 @@ def verifyUser(message):
 
 #Simple function that sends a UDP message
 def sendUDPMessage(message,CS_Socket,address,port):
-	if not isinstance(message, bytes):
-		message = message.encode()
-	CS_Socket.sendto(message,(address,port))
+	try:
+		if not isinstance(message, bytes):
+			message = message.encode()
+			CS_Socket.sendto(message,(address,port))
+	except socket.error as e:
+		print ('Error sending message from UDPSocket to CS  \nTerminating Process')
+		sys.exit(1)
 	return 1

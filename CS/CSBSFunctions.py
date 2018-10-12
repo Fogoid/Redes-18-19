@@ -5,11 +5,9 @@ from CSBaseFunctions import *
 
 def LSFCommand(BSIP, BSport, username, dirname):
 	lsfMsg = 'LSF ' + username + ' ' + dirname + '\n'
-	print(lsfMsg, "is this it?")
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport)
 	splitedMsg = msgRecv.split(' ')
 	if CMDMatcher(splitedMsg[0], '^LFD$'):
-		print(len(splitedMsg[2:]))
 		if len(splitedMsg[2:]) == 4*int(splitedMsg[1]):
 			return msgRecv[4:]
 	elif CMDMatcher(msgRecv, '^ERR$'):
@@ -18,7 +16,6 @@ def LSFCommand(BSIP, BSport, username, dirname):
 def LSUCommand(BS_IP, BS_port, username, password):
 	lsuMsg = 'LSU ' + username + ' ' + password + '\n'
 	msgRecv = communicateUDP(lsuMsg, BS_IP, BS_port)
-	print(("LSU received this msg:", msgRecv))
 	splitedMsg = msgRecv.split(' ')
 	if CMDMatcher(splitedMsg[0], '^LUR$'):
 		return splitedMsg[1]

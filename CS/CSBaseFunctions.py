@@ -14,7 +14,7 @@ def TCPSocket():
 			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		except socket.error as e:
-			print ('Error creating socket: '+ e + '\nTerminating Process')
+			print ('Error creating TCPSocket\nTerminating Process')
 			sys.exit(1)
 		return TCP_Socket
 
@@ -24,7 +24,7 @@ def UDPSocket():
 		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	except socket.error as e:
-		print ('Error creating socket: '+ e + '\nTerminating Process')
+		print ('Error creating socket: UDPSocket\nTerminating Process')
 		sys.exit(1)
 	return UDP_Socket
 
@@ -50,7 +50,7 @@ def sendTCPMessage(userSocket, msg):
 			msg = msg.encode()
 		userSocket.send(msg)
 	except socket.error as e:
-		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		print ('Error sending message from TCPSocket to User\nTerminating Process')
 		sys.exit(1)
 	return 0
 
@@ -61,7 +61,7 @@ def communicateUDP(msg, BS_IP, BS_Port):
 		BS_Socket = UDPSocket()
 		BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
 	except socket.error as e:
-		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		print ('Error sending message from UDPSocket to BS\nTerminating Process')
 		sys.exit(1)
 		
 	data = ''
@@ -70,7 +70,7 @@ def communicateUDP(msg, BS_IP, BS_Port):
 		(UDPmsg,BS_address) = BS_Socket.recvfrom(1024)
 		UDPmsg = UDPmsg.decode()
 	except socket.error as e:
-		print ('Error receiving message: '+ str(e) + '\nTerminating Process')
+		print ('Error receiving message from UDPSocket sent by BS\nTerminating Process')
 		sys.exit(1)
 	BS_Socket.close()
 	return UDPmsg
@@ -144,12 +144,15 @@ def AUTCommand(userSocket, message):
 				else:
 					autMsg += 'NOK\n'
 		else:
-			with open(datafile,'w') as file:
-				file.write(password)
-			os.makedirs('user_'+message[1])
-			file = open('user_'+message[1]+'/'+'BS_Register.txt','w')
-			file.close()
-			autMsg += 'NEW\n'
+			try:
+				with open(datafile,'w') as file:
+					file.write(password)
+				os.makedirs('user_'+message[1])
+				file = open('user_'+message[1]+'/'+'BS_Register.txt','w')
+				file.close()
+				autMsg += 'NEW\n'
+			except (OSError, IOError) as e: 				
+				print('Error writing in the file: BS_Register.txt \n')
 	else:
 		autMsg = 'ERR\n'
 

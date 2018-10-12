@@ -34,40 +34,52 @@ def BKRCommand(msgRecv, username, password, userSocket):
 
 	if CMDMatcher(splitedMsg[0], '^BCK$'):
 		if os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
-			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
-			[address, port] = file.readline().split(' ')
-			file.close()
+			try:
+				file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
+				[address, port] = file.readline().split(' ')
+				file.close()
+			except (OSError, IOError) as e: 				
+				print('Error writing in the file: IP_port.txt \n')
+
 			LSF_BS_msg += splitedMsg[1]
 			filesKept = LSFCommand(address, port, username, splitedMsg[1]).split(' ')
 			common = notCommon(splitedMsg[2:], filesKept)
-			print(common)
 			BKR_user_msg += address + ' ' + port + ' ' + str(len(common))
 			for string in common:
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
 			BSconnection = getBS().strip('\n')
-			[BSIP, BSport] = BSconnection.split(' ')
-			file = open('./' + usernameDirectory + '/BS_Register.txt')
-			while True:
-				line = file.readline()
-				if line == BSconnection:
-					status = "OK\n"
-					break
-				elif line == '':
-					status = LSUCommand(BSIP, BSport, username, password)
-					break
-			file.close()
+			try:
+				[BSIP, BSport] = BSconnection.split(' ')
+				file = open('./' + usernameDirectory + '/BS_Register.txt')
+				while True:
+					line = file.readline()
+					if line == BSconnection:
+						status = "OK\n"
+						break
+					elif line == '':
+						status = LSUCommand(BSIP, BSport, username, password)
+						break
+				file.close()
+			except (OSError, IOError) as e:
+				print('Error writing in the file: BS_Register.txt \n')
 
 			if not os.path.exists('./' + usernameDirectory + '/' + splitedMsg[1]):
 				os.makedirs('./' + usernameDirectory + '/' + splitedMsg[1])
-			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt', 'w')
-			file.write(BSconnection.strip('\n'))
-			file.close()
+			try:
+				file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt', 'w')
+				file.write(BSconnection.strip('\n'))
+				file.close()
+			except (OSError, IOError) as e: 				
+				print('Error writing in the file: IP_port.txt \n')
 			
-			file = open('./' + usernameDirectory + '/BS_Register.txt', 'w')
-			file.write(BSconnection.strip('\n'))
-			file.close()
+			try:
+				file = open('./' + usernameDirectory + '/BS_Register.txt', 'w')
+				file.write(BSconnection.strip('\n'))
+				file.close()
+			except (OSError, IOError) as e: 				
+				print('Error writing in the file: BS_Register.txt \n')
 
 			if CMDMatcher(status, '^OK\n$'):
 				BKR_user_msg += BSconnection.strip('\n') + ' ' + ' '.join(splitedMsg[2:])

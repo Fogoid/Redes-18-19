@@ -36,7 +36,6 @@ else:
 			msgRecv = b''
 			while True:
 				data = userSocket.recv(buffersize)
-				print(data)
 				if data[-1:] == b'\n' or not data:
 					msgRecv += data
 					break

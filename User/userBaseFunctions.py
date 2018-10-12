@@ -12,7 +12,7 @@ def TCPSocket():
 			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		except socket.error as e:
-			print ('Error creating socket: '+ e + '\nTerminating Process')
+			print ('Error creating TCPSocket\nTerminating Process')
 			sys.exit(1)
 		return TCP_Socket
 
@@ -22,7 +22,7 @@ def UDPSocket():
 		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	except socket.error as e:
-		print ('Error creating socket: '+ e + '\nTerminating Process')
+		print ('Error creating UDPSocket\nTerminating Process')
 		sys.exit(1)
 	return UDP_Socket
 
@@ -43,7 +43,6 @@ def CMDMatcher(msg, pattern):
 def dateFormatter(date):
 	date = date.split(' ')
 	newDate = str("%02d" % int(date[2])) + '.' + str("%02d" % int(time.strptime(date[1], '%b').tm_mon)) + '.' + date[4] + ' ' + date[3]
-	print(newDate)
 	return newDate
 
 def sendMessage(mySocket, msgSent):
@@ -52,7 +51,7 @@ def sendMessage(mySocket, msgSent):
 			msgSent = msgSent.encode()
 		mySocket.sendall(msgSent)
 	except socket.error as e:
-		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		print ('Error sending message from TCPSocket to CS\nTerminating Process')
 		sys.exit(1)
 	return 0
 
@@ -68,7 +67,7 @@ def recvMessage(mySocket, n):
 		else:
 			msg = mySocket.recv(128).decode()
 	except socket.error as e:
-		print ('Error receiving message: '+ str(e) + '\nTerminating Process')
+		print ('Error receiving message from TCPSocket sent by CS\nTerminating Process')
 		sys.exit(1)
 	return msg
 
@@ -79,6 +78,7 @@ def readFilesData(directory, filename, size):
 	except (OSError, IOError) as e:
 		print('Error reading the file:'+filename+'\n')
 	data = file.read(size)
+	file.close()
 
 	return data
 
@@ -106,7 +106,7 @@ def authenticateUser(mySocket):
 	while True:
 		userLogin = input()
 
-		if(CMDMatcher(userLogin,'^login\s[0-9]{5}\s[0-9 a-z]{8}$')):
+		if(CMDMatcher(userLogin,'^login\s[0-9]{5}\s[0-9 A-Z a-z]{8}$')):
 
 			(cmd, username, password) = userLogin.split(' ')
 
