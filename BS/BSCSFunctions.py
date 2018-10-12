@@ -19,7 +19,6 @@ def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 			break 
 	msgRecv = data.decode()
 	
-	print((msgRecv, 'comecei com esta mensagem'))
 
 	CS_Socket.close()
 
@@ -28,16 +27,13 @@ def startBS(CS_Socket,CS_address,CS_port,BS_address,BS_port):
 
 	return 0
 
-'''
-	MISSING HANDLER FOR CTRL+C IN ORDER TO FINISH UDP CONNECTION
-'''
 
 #Responsible for handling the LSF (listfile dir) request
 def LFDCommand(msgRecv, CS_Socket, address, port):
 	lfdMsg = b'LFD '
 	directory = msgRecv[2].rstrip('\n')
 	lfdMsg += readDirectory(msgRecv[1], directory)
-	print(lfdMsg)
+
 
 	sendUDPMessage(lfdMsg, CS_Socket, address, port)
 	return 0

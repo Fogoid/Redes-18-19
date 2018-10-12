@@ -13,7 +13,7 @@ def TCPSocket():
 			TCP_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			TCP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		except socket.error as e:
-			print ('Error creating socket: '+ e + '\nTerminating Process')
+			print ('Error creating TCPSocket\nTerminating Process')
 			sys.exit(1)
 		return TCP_Socket
 
@@ -23,7 +23,7 @@ def UDPSocket():
 		UDP_Socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		UDP_Socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	except socket.error as e:
-		print ('Error creating socket: '+ e + '\nTerminating Process')
+		print ('Error creating UDPSocket\nTerminating Process')
 		sys.exit(1)
 	return UDP_Socket
 
@@ -32,7 +32,7 @@ def getConnectionDetails():
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
 	parser.add_argument('-b', metavar='BSport', type=int, default=59000, help='Well-know available port for the CS and user to connect to')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Name of the CS where the BS will connect to')
-	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Port from CS where the BS will connect to')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Port from CS where the BS will connect to')
 
 	connectionDetails = parser.parse_args()
 	return (connectionDetails.b,connectionDetails.n, connectionDetails.p)

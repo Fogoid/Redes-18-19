@@ -24,7 +24,7 @@ global_BS_port =  BS_port
 exit = 0
 #This part will be responsible for the user TCP protocol implementation
 newPID = os.fork()
-buffersize = 8192
+buffersize = 1024
 
 
 
@@ -52,10 +52,11 @@ if newPID == 0:
 
 			msgRecv = b''
 			data = b''
+
 			while True:
 				data = User_Socket.recv(buffersize)
 				msgRecv += data
-				if msgRecv[-1:] == b'\n':
+				if msgRecv[-1:] == b'\n' or not data:
 					break
 
 			msgSplit = msgRecv.split(b' ')

@@ -29,7 +29,7 @@ def UDPSocket():
 def getConnectionDetails():
 	parser = argparse.ArgumentParser(description='Get connection details to connect to server.')
 	parser.add_argument('-n', metavar='CSname', type=str, default='localhost', help='Gives the name of the address do connect')
-	parser.add_argument('-p', metavar='CSport', type=int, default=58011, help='Gives the port the user will connect to')
+	parser.add_argument('-p', metavar='CSport', type=int, default=58032, help='Gives the port the user will connect to')
 
 	connectionDetails = parser.parse_args()
 	return (connectionDetails.n, connectionDetails.p)

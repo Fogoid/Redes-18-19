@@ -31,7 +31,7 @@ else:
 			msgRecv = msgRecv.split(' ')
 			Username = msgRecv[1]
 			Password = msgRecv[2].rstrip('\n')
-			print(Username+' '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
+			print(Username+' '+'User '+msgRecv[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
 			msgRecv = b''
 			while True:
@@ -44,7 +44,7 @@ else:
 			msgRecv = msgRecv.decode()
 			msgSplit = msgRecv.split(' ')
 			if msgRecv!='':
-				print(Username+' '+msgSplit[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
+				print(Username+' '+'User '+msgSplit[0].rstrip('\n')+' '+client_address[0]+' '+str(client_address[1]))
 
 			if CMDMatcher(msgSplit[0],'^DLU\n$'):
 				DLRCommand(Username,userSocket)

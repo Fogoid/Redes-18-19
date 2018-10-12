@@ -1,0 +1,2 @@
+This project was made in python, version Python3. 
+It's composed by 3 main files: CS.py(Central Server), BS.py(Backup Server) and user.py(User) which are in the correspondent folders (CS, BS and User, respectively). In addition to these files we created auxiliary files, which contain the needed functions in order to make the program run properly. To execute each file, use "python3 <folder>/<file>.py -flags -flagValues" (being <folder> => User, CS or BS, <file> => user.py, CS.py or BS.py and -flags/-flagValues the arguments that the program can receive).
