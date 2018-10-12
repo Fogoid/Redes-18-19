@@ -61,7 +61,6 @@ def readFileData(directory, filename, size):
 
 #Writes data on a file
 def writeFileData(file, dataList, i):
-	print(dataList)
 	size = int(dataList[i+3].decode())
 	i += 4
 	data = dataList[i]

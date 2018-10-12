@@ -16,13 +16,11 @@ newPID = os.fork()
 if newPID == 0:
 	UDPConnections(CS_address,CS_port)
 else:
-	BSSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	BSSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	BSSocket = UDPSocket()
 
 	while True:
 
-		serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		serverSocket = TCPSocket()
 		serverSocket.bind((CS_address, CS_port))
 		serverSocket.listen(2)
 		(userSocket, client_address) = serverSocket.accept()

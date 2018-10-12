@@ -43,12 +43,17 @@ if newPID == 0:
 			username = msgRecv[1]
 
 			msgRecv = b''
+			data = b''
+			User_Socket.settimeout(1)
+			data = User_Socket.recv(buffersize)
 			while True:
-				data = User_Socket.recv(buffersize)
-				if not data or data[-1:] == b'\n':
-					msgRecv += data
+					data = User_Socket.recv(buffersize)
+				
+				if (not data) or msgRecv[-1:] == b'\n':
 					break
+				
 				msgRecv += data
+				data = User_Socket.recv(buffersize)
 
 			msgSplit = msgRecv.split(b' ')
 			msgSplit[-1] = msgSplit[-1].strip(b'\n')

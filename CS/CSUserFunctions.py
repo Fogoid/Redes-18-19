@@ -47,14 +47,15 @@ def BKRCommand(msgRecv, username, password, userSocket):
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
 		else:
-			BSconnection = getBS()
+			BSconnection = getBS().strip('\n')
 			[BSIP, BSport] = BSconnection.split(' ')
 			file = open('./' + usernameDirectory + '/BS_Register.txt')
 			while True:
-				if file.readline() == BSconnection:
+				line = file.readline()
+				if line == BSconnection:
 					status = "OK\n"
 					break
-				elif file.readline() == '':
+				elif line == '':
 					status = LSUCommand(BSIP, BSport, username, password)
 					break
 			file.close()
