@@ -25,7 +25,10 @@ def RSBCommand(mySocket, directory, username, password):
 			msg = 'Number of files: ' + rstRecv[1].decode()
 			index = 2
 			for n in range(0, int(rstRecv[1].decode())):
-				file = open('./' + directory + '/' + rstRecv[index].decode(), 'wb')
+				try:
+					file = open('./' + directory + '/' + rstRecv[index].decode(), 'wb')
+				except (OSError, IOError) as e:
+					print('Error reading the file:'+filename+' '+str(e[0])+' '+str(e[1])+'\n')
 				index = writeFileData(file, rstRecv, index)
 				file.close()
 

@@ -23,7 +23,15 @@ while not exit:
 	mySocket = TCPSocket()
 
 	if not loggedIn:
-		mySocket.connect((address, port))
+		try:
+			mySocket.connect((address, port))
+		except socket.gaierror as e:
+			print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+			sys.exit(1)
+		except socket.error as e:
+			print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+			sys.exit(1)
+		
 
 		(userName, userPassword, exit) = authenticateUser(mySocket)
 

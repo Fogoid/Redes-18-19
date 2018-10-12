@@ -47,21 +47,29 @@ def dateFormatter(date):
 	return newDate
 
 def sendMessage(mySocket, msgSent):
-	if not isinstance(msgSent, bytes):
-		msgSent = msgSent.encode()
-	mySocket.send(msgSent)
+	try:
+		if not isinstance(msgSent, bytes):
+			msgSent = msgSent.encode()
+		mySocket.send(msgSent)
+	except socket.error as e:
+		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		sys.exit(1)
+	return 0
 
 def recvMessage(mySocket, n):
-	if n:
-		msg = ''.encode()
-		while True:
-			data = mySocket.recv(256)
-			if not data:
-				break
-			msg += data
-	else:
-		msg = mySocket.recv(128).decode()
-
+	try:
+		if n:
+			msg = ''.encode()
+			while True:
+				data = mySocket.recv(256)
+				if not data:
+					break
+				msg += data
+		else:
+			msg = mySocket.recv(128).decode()
+	except socket.error as e:
+		print ('Error receiving message: '+ str(e) + '\nTerminating Process')
+		sys.exit(1)
 	print((msg, "this was a received message"))
 	return msg
 
@@ -70,7 +78,7 @@ def readFilesData(directory, filename, size):
 	try:
 		file = open('./' + directory + '/' + filename, 'rb')
 	except (OSError, IOError) as e:
-		print('Error reading the file:'+filename+' '+e[0]+' '+e[1]+'\n')
+		print('Error reading the file:'+filename+' '+str(e[0])+' '+str(e[1])+'\n')
 	data = file.read(size)
 
 	return data

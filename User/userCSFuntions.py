@@ -77,9 +77,16 @@ def BCKCommand(mySocket, directory, username, password):
 		else:
 			mySocket.close()
 
-			mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			mySocket = TCPSocket()
 
-			mySocket.connect((bckRecv[1], int(bckRecv[2])))
+			try:
+				mySocket.connect((bckRecv[1], int(bckRecv[2])))
+			except socket.gaierror as e:
+				print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+				sys.exit(1)
+			except socket.error as e:
+				print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+				sys.exit(1)
 
 			UPLCommand(mySocket, directory, bckRecv[3:], username, password)
 
@@ -110,8 +117,15 @@ def RSTCommand(mySocket, directory, username, password):
 	if CMDMatcher(rstRecv[0], '^RSR$'):
 		mySocket.close()
 
-		mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		mySocket = TCPSocket()
 
-		mySocket.connect((rstRecv[1], int(rstRecv[2])))
+		try:
+			mySocket.connect((rstRecv[1], int(rstRecv[2])))
+		except socket.gaierror as e:
+			print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+			sys.exit(1)
+		except socket.error as e:
+			print("Error related to the address the Socket is connecting to "+str(e)+"\n Terminating Process")
+			sys.exit(1)
 
 		RSBCommand(mySocket, directory, username, password)
