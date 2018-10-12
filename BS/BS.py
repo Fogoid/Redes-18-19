@@ -8,19 +8,23 @@ from BSUserFunctions import *
 from BSCSFunctions import *
 
 #Starting the UDP socket to register in the CS
-global exit
+global global_CS_addressName, global_CS_port, global_BS_address, global_BS_port
 
 (BS_port, CS_addressName, CS_port) = getConnectionDetails()
 CS_address = socket.gethostbyname(CS_addressName)
 BS_address = socket.gethostbyname('localhost')
 CS_Start_Socket = UDPSocket()
 exit = startBS(CS_Start_Socket,CS_address,CS_port,BS_address,BS_port)
+global_CS_addressName = CS_address
+global_CS_port = CS_port
+global_BS_address = BS_address
+global_BS_port =  BS_port
 
 
 exit = 0
 #This part will be responsible for the user TCP protocol implementation
 newPID = os.fork()
-buffersize = 256
+buffersize = 524288
 
 
 
@@ -33,7 +37,11 @@ if newPID == 0:
 		BS_Socket = TCPSocket()
 		BS_Socket.bind((BS_address, BS_port))
 		BS_Socket.listen(5)
-		(User_Socket, User_address) = BS_Socket.accept()
+		try:
+			(User_Socket, User_address) = BS_Socket.accept()
+		except (KeyboardInterrupt, SystemExit) as e:
+			print("The Keyboard interruption CTRL+C was pressed. Will soon exit.")
+			sys.exit(1)
 
 		msgRecv = User_Socket.recv(buffersize).decode()
 
@@ -44,17 +52,16 @@ if newPID == 0:
 
 			msgRecv = b''
 			data = b''
-			User_Socket.settimeout(1)
-			data = User_Socket.recv(buffersize)
+			print("ola")
 			while True:
-					data = User_Socket.recv(buffersize)
-				
-				if (not data) or msgRecv[-1:] == b'\n':
-					break
-				
-				msgRecv += data
 				data = User_Socket.recv(buffersize)
+				print("this is where i receive it")
+				msgRecv += data
+				if msgRecv[-1:] == b'\n':
+					break
+				print(msgRecv)
 
+			print("ola")
 			msgSplit = msgRecv.split(b' ')
 			msgSplit[-1] = msgSplit[-1].strip(b'\n')
 
@@ -75,13 +82,21 @@ if newPID == 0:
 
 #This piece of code is working but disable CTRL + C interrupt. Let's leave it in a comment for now.
 # ----------------------------------------------------------------------------------
-#def SIGINT_Handler(signum,frame):
-#	exit = 1
-#	print(exit)
-#	return 0
+def SIGINT_Handler(signum,frame):
+
+	udp_socket = UDPSocket()
+	message = 'UNR '+ global_BS_address + ' ' + str(global_BS_port) + '\n'
+	sendUDPMessage(message,udp_socket,global_CS_addressName,global_CS_port)
+	(message, server) = udp_socket.recvfrom(1024)
+	message = message.decode()
+	if CMDMatcher(message,'^UAR OK\n$'):
+		print("Terminating process")
+		sys.exit(1)
+	print(message)
+	return 0
 
 
-#signal.signal(signal.SIGINT,SIGINT_Handler)
+signal.signal(signal.SIGINT,SIGINT_Handler)
 # ----------------------------------------------------------------------------------
 
 
@@ -106,7 +121,7 @@ while 1:
 				LURCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif CMDMatcher(msgRecv[0],'^DLB$'):
-				DLBCommand(msgRecv,CS_Socket,CS_address,CS_port)
+				DBRCommand(msgRecv,CS_Socket,CS_address,CS_port)
 
 	elif exit ==1:
 		exitGracefully(CS_Socket,CS_address,CS_port,BS_address,BS_port)

@@ -45,21 +45,35 @@ def CMDMatcher(msg, pattern):
 
 #Simple function that sends the specified message through TCP
 def sendTCPMessage(userSocket, msg):
-	if not isinstance(msg, bytes):
-		msg = msg.encode()
-	userSocket.send(msg)
+	try:
+		if not isinstance(msg, bytes):
+			msg = msg.encode()
+		userSocket.send(msg)
+	except socket.error as e:
+		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		sys.exit(1)
+	return 0
+
 
 #Simple function that communicates in TCP
 def communicateUDP(msg, BS_IP, BS_Port):
-	BS_Socket = UDPSocket()
-	BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
+	try:
+		BS_Socket = UDPSocket()
+		BS_Socket.sendto(msg.encode(),(BS_IP, int(BS_Port)))
+	except socket.error as e:
+		print ('Error sending message: '+ str(e) + '\nTerminating Process')
+		sys.exit(1)
+		
 	data = ''
 	UDPmsg = ''
-	(UDPmsg,BS_address) = BS_Socket.recvfrom(1024)
-	UDPmsg = UDPmsg.decode()
+	try:
+		(UDPmsg,BS_address) = BS_Socket.recvfrom(1024)
+		UDPmsg = UDPmsg.decode()
+	except socket.error as e:
+		print ('Error receiving message: '+ str(e) + '\nTerminating Process')
+		sys.exit(1)
 	BS_Socket.close()
 	return UDPmsg
-
 
 #Cicle that keeps waiting for new BS's to register
 def UDPConnections(CS_address,CS_port):
@@ -74,20 +88,37 @@ def UDPConnections(CS_address,CS_port):
 		while not msgRecv != b'':
 			(msgRecv, BS_Server) = BS_Socket.recvfrom(1024)
 
-		print(msgRecv, 'dwkndakda')
-		msgRecv = msgRecv.decode().split(' ')
-		RGR_msg = 'RGR '
+		msgRecv = msgRecv.decode()
+		splitedMsg = msgRecv.split(' ')
 
-		if CMDMatcher(msgRecv[0],'^REG$') and CMDMatcher(msgRecv[2],'^[0-9]{5}\n$'):
-			file = open('backupServers.txt','ab+')
-			print('BS '+'RGR '+msgRecv[1] + ' ' + msgRecv[2].rstrip('\n'))
-			file.write((msgRecv[1] + ' '+ msgRecv[2]).encode())
-			file.close()
-			RGR_msg+='OK\n'
+		msg = ''
+		if CMDMatcher(splitedMsg[0], '^UNR$'):
+			msg += 'UAR '
+			if CMDMatcher(msgRecv, '^UNR\s[0-9 .]+\s[0-9]{5}\n$'):
+
+				print('BS '+'UNR '+splitedMsg[1] + ' ' + splitedMsg[2].rstrip('\n'))
+				msg += 'OK\n'
+			else:
+				msg += 'ERR\n'
+
+		elif CMDMatcher(splitedMsg[0],'^REG$'):
+			msg += 'RGR '
+			if CMDMatcher(msgRecv,'^REG\s[0-9 .]+\s[0-9]{5}\n$'):
+			
+				try:
+					file = open('backupServers.txt','ab+')
+					print('BS '+'RGR '+splitedMsg[1] + ' ' + splitedMsg[2].rstrip('\n'))
+					file.write((splitedMsg[1] + ' '+ splitedMsg[2]).encode())
+					file.close()
+				except (OSError, IOError) as e:
+					print('Error writing in the file: backupServers.txt \n')
+				msg+='OK\n'
+			else:
+				msg += 'ERR\n'
 		else:
-			RGR_msg+='NOK\n'
+			msg ='ERR\n'
 
-		BS_Socket.sendto(RGR_msg.encode(),(BS_Server[0],int(BS_Server[1])))
+		BS_Socket.sendto(msg.encode(),(BS_Server[0],int(BS_Server[1])))
 
 		BS_Socket.close()
 
@@ -102,7 +133,7 @@ def removeUser(username):
 #User authentication command
 def AUTCommand(userSocket, message):
 	autMsg = 'AUR '
-	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}$'):
+	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 A-Z a-z]{8}$'):
 		message = message.split(' ')
 		datafile = 'user_'+message[1] + '.txt'
 		password = message[2].rstrip('\n')

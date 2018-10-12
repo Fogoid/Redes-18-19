@@ -31,7 +31,7 @@ def RSBCommand(message, username, userSocket):
 	files_info = b''
 	file_number = 0
 
-	if CMDMatcher(message, b'^RSB\s[a-z]+\n$'):
+	if CMDMatcher(message, b'^RSB\s[!-~]+\n$'):
 		message = message.decode().split(' ')
 		message[1] = message[1].rstrip('\n')
 		for (paths, dirnames, files) in os.walk('./' +usernameDirectory+'/'+message[1]):

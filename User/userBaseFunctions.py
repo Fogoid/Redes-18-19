@@ -50,7 +50,7 @@ def sendMessage(mySocket, msgSent):
 	try:
 		if not isinstance(msgSent, bytes):
 			msgSent = msgSent.encode()
-		mySocket.send(msgSent)
+		mySocket.sendall(msgSent)
 	except socket.error as e:
 		print ('Error sending message: '+ str(e) + '\nTerminating Process')
 		sys.exit(1)
@@ -61,7 +61,7 @@ def recvMessage(mySocket, n):
 		if n:
 			msg = ''.encode()
 			while True:
-				data = mySocket.recv(256)
+				data = mySocket.recv(2048)
 				if not data:
 					break
 				msg += data
@@ -70,7 +70,6 @@ def recvMessage(mySocket, n):
 	except socket.error as e:
 		print ('Error receiving message: '+ str(e) + '\nTerminating Process')
 		sys.exit(1)
-	print((msg, "this was a received message"))
 	return msg
 
 def readFilesData(directory, filename, size):
@@ -78,7 +77,7 @@ def readFilesData(directory, filename, size):
 	try:
 		file = open('./' + directory + '/' + filename, 'rb')
 	except (OSError, IOError) as e:
-		print('Error reading the file:'+filename+' '+str(e[0])+' '+str(e[1])+'\n')
+		print('Error reading the file:'+filename+'\n')
 	data = file.read(size)
 
 	return data
@@ -118,8 +117,11 @@ def authenticateUser(mySocket):
 			elif status == 'NOK\n':
 				print("Wrong password")
 				continue
-			else:
+			elif status == 'NEW\n':
 				print("A new user was created with your credentials")
+			else:
+				print("Error processing request")
+				return ('NNNNNN', "NNNNNNNN", 1)
 
 			return (username, password, 0)
 

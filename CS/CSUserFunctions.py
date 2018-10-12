@@ -30,8 +30,6 @@ def BKRCommand(msgRecv, username, password, userSocket):
 	BS_Server = ''
 	status = 'NOK'
 
-	print(msgRecv)
-	print("dont i receive the whole thing?")
 	splitedMsg = msgRecv.split(' ')
 
 	if CMDMatcher(splitedMsg[0], '^BCK$'):
@@ -40,9 +38,10 @@ def BKRCommand(msgRecv, username, password, userSocket):
 			[address, port] = file.readline().split(' ')
 			file.close()
 			LSF_BS_msg += splitedMsg[1]
-			filesKept = LSFCommand(address, port, username, splitedMsg[1])
-			common = notCommon(splitedMsg[2:], filesKept[1:])
-			BKR_user_msg += len(common)
+			filesKept = LSFCommand(address, port, username, splitedMsg[1]).split(' ')
+			common = notCommon(splitedMsg[2:], filesKept)
+			print(common)
+			BKR_user_msg += address + ' ' + port + ' ' + str(len(common))
 			for string in common:
 				BKR_user_msg += ' ' + string
 			BKR_user_msg += '\n'
@@ -77,7 +76,6 @@ def BKRCommand(msgRecv, username, password, userSocket):
 	else:
 		BKR_user_msg = 'ERR\n'
 
-	print(BKR_user_msg)
 	sendTCPMessage(userSocket, BKR_user_msg)
 	return 0
 
@@ -90,7 +88,6 @@ def notCommon(list1, list2):
 		files1 += [' '.join(x for x in list1[i*4+1:i*4+5])]
 	for i in range(0, int(list2[0])):
 		files2 += [' '.join(x for x in list2[i*4+1:i*4+5])]
-	print(files1, files2)
 	return getNotCommon(files1, files2, [])
 
 def getNotCommon(list1, list2, notCommon):
@@ -102,10 +99,18 @@ def getNotCommon(list1, list2, notCommon):
 		return getNotCommon(list1[1:], list2, notCommon)
 
 def getBS():
-	file = open('./backupServers.txt', 'r')
-	msg = file.readline()
-	#FIXME for more BS
-	file.close()
+	msg = ''
+	try:
+		lines = []
+		with open('./backupServers.txt', 'r') as file:
+			lines = file.readlines()
+		msg = lines[0]
+		with open('./backupServers.txt', 'w') as file:
+			for line in lines[1:]:
+				file.write(line)
+			file.write(lines[0])
+	except (OSError, IOError) as e:
+		print("Error reading or writing in the file ./backupServers.txt\n")
 
 	return msg
 
@@ -114,7 +119,7 @@ def RSRCommand(msgRecv, username, userSocket):
 	rsrMsg ='RSR '
 	usernameDirectory = "user_"+username
 
-	if CMDMatcher(msgRecv, '^RST\s[a-z]+\n$'):
+	if CMDMatcher(msgRecv, '^RST\s[!-~]+\n$'):
 		msgRecv = msgRecv.split(' ')
 		directory = msgRecv[1].rstrip('\n')
 		if os.path.exists('./'+usernameDirectory+'/'+directory):
@@ -145,7 +150,7 @@ def LDRCommand(username, userSocket):
 	sendTCPMessage(userSocket, ldrMsg)
 	return 0
 
-def LFDCommand(msgRecv, username, userSocket, BSSocket):
+def LFDCommand(msgRecv, username, userSocket):
 	lfdMsg='LFD '
 	usernameDirectory = "user_" + username
 	msgRecv = msgRecv.split(' ')
@@ -160,8 +165,10 @@ def LFDCommand(msgRecv, username, userSocket, BSSocket):
 				BS_Server.append(bs_data[1])
 			lfdMsg += BS_Server[0] + ' '
 			lfdMsg += BS_Server[1] + ' '
-			lfdMsg += LSFCommand(BSSocket, BS_Server[0], BS_Server[1], username, msgRecv[1])
+			lfdMsg += LSFCommand(BS_Server[0], BS_Server[1], username, msgRecv[1])
 			print(lfdMsg)
+		else:
+			lfdMsg += 'NOK\n'
 	else:
 		lfdMsg='ERR\n'
 
@@ -173,7 +180,7 @@ def DDRCommand(msgRecv,username,userSocket):
 	usernameDirectory = "user_" + username
 	BS_Server = []
 
-	if CMDMatcher(msgRecv, '^DEL\s[a-z]+\n$'):
+	if CMDMatcher(msgRecv, '^DEL\s[!-~]+\n$'):
 		msgRecv=msgRecv.split(' ')
 		msgRecv[1] = msgRecv[1].rstrip('\n')
 		if os.path.exists(usernameDirectory+'/'+msgRecv[1]):
@@ -181,7 +188,8 @@ def DDRCommand(msgRecv,username,userSocket):
 				bs_data = file.readline().split(' ')
 				BS_Server.append(bs_data[0])
 				BS_Server.append(bs_data[1])
-			#FIX ME : SEND BS SERVER INSTRUCTION TO DESTROY DIR
+			msg = 'DLB '+username+' '+msgRecv[1]+'\n'
+			communicateUDP(msg, BS_Server[0], BS_Server[1])
 			shutil.rmtree(usernameDirectory+'/'+msgRecv[1],ignore_errors=True)
 			ddrMsg += 'OK\n'
 		else:

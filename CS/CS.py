@@ -60,7 +60,7 @@ else:
 				LDRCommand(Username,userSocket)
 
 			elif CMDMatcher(msgSplit[0],'^LSF$'):
-				LFDCommand(msgRecv,Username,userSocket, BSSocket)
+				LFDCommand(msgRecv,Username,userSocket)
 
 			elif CMDMatcher(msgSplit[0],'^DEL$'):
 				DDRCommand(msgRecv,Username,userSocket)

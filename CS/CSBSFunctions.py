@@ -5,8 +5,9 @@ from CSBaseFunctions import *
 
 def LSFCommand(BSIP, BSport, username, dirname):
 	lsfMsg = 'LSF ' + username + ' ' + dirname + '\n'
+	print(lsfMsg, "is this it?")
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport)
-	print(splitedMsg)
+	splitedMsg = msgRecv.split(' ')
 	if CMDMatcher(splitedMsg[0], '^LFD$'):
 		print(len(splitedMsg[2:]))
 		if len(splitedMsg[2:]) == 4*int(splitedMsg[1]):

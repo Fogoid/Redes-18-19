@@ -1,6 +1,7 @@
 import socket
 import sys
 import os
+import shutil
 from BSBaseFunctions import *
 
 #Function that registers the BS server on the CS through UDP
@@ -48,7 +49,7 @@ def LURCommand(msgRecv, CS_Socket, address, port):
 	filename='user_'+msgRecv[1]+'.txt'
 
 	full_msg = msgRecv[0]+' '+msgRecv[1]+' '+msgRecv[2]
-	if CMDMatcher(full_msg, '^LSU\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
+	if CMDMatcher(full_msg, '^LSU\s[0-9]{5}\s[0-9 A-Z a-z]{8}\n$'):
 		if not os.path.exists(filename):
 			with open(filename,'w') as file:
 				file.write(msgRecv[2].rstrip('\n'))

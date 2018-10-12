@@ -91,7 +91,7 @@ def readDirectory(username, directory):
 def sendTCPMessage(User_Socket, msg):
 	if not isinstance(msg, bytes):
 		msg = msg.encode()
-	User_Socket.send(msg)
+	User_Socket.sendall(msg)
 
 #Sends a 'ERR' message
 def sendTCPError(User_Socket,msg):
@@ -113,7 +113,7 @@ def AUTCommand(message,User_Socket):
 #Checks if the given user is valid and is loaded in the BS server's users.txt list
 def verifyUser(message):
 
-	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 a-z]{8}\n$'):
+	if CMDMatcher(message, '^AUT\s[0-9]{5}\s[0-9 A-Z a-z]{8}\n$'):
 		message = message.split(' ')
 		user_file = 'user_' + message[1] +'.txt'
 		password = message[2].rstrip('\n')

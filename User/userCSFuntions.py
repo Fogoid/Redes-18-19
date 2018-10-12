@@ -22,18 +22,20 @@ def LSDCommand(mySocket):
 
 	return 1
 
-def LSFCommand(mySocket, directory): #finish me later
-	msgSent = "LSF " + directory
+def LSFCommand(mySocket, directory):
+	msgSent = "LSF " + directory + '\n'
 	sendMessage(mySocket, msgSent)
 
 	lsfRecv = (recvMessage(mySocket, 1).decode()).split(' ')
-	print(lsfRecv)
 	if CMDMatcher(lsfRecv[0], '^LFD$'):
-		print(lsfRecv)
-		msg = "Backup server ip: " + lsfRecv[1] + "\nBackup server port: " + lsfRecv[2] + "\nFiles stored: " + lsfRecv[3] + "\n"
-		for n in range(1, int(lsfRecv[3])+1):
-			msg += lsfRecv[3*n+1] + ' ' + lsfRecv[3*n+2] + ' ' + lsfRecv[3*n+3] + lsfRecv[3*n + 4]
-		print(msg)
+		if not CMDMatcher(lsfRecv[1], '^NOK\n$'):
+			msg = "Backup server ip: " + lsfRecv[1] + "\nBackup server port: " + lsfRecv[2] + "\nFiles stored: " + lsfRecv[3] + "\n"
+			for n in range(1, int(lsfRecv[3])+1):
+				msg += lsfRecv[4*n] + ' ' + lsfRecv[4*n+1] + ' ' + lsfRecv[4*n+2] +  ' ' + lsfRecv[4*n + 3] + '\n'
+			print(msg)
+		else:
+			print("Could not access directory "+directory)
+	return 0
 
 #The command that processes the Delete user request
 def DLUCommand(mySocket):
@@ -45,7 +47,6 @@ def DLUCommand(mySocket):
 	dluRecv = recvMessage(mySocket, 0).split(' ')
 
 	if CMDMatcher(dluRecv[0], "^DLR$"):
-		print(dluRecv[1], end="")
 		if CMDMatcher(dluRecv[1], "^OK\n$"):
 			print("User deleted successfully")
 			return 0;
@@ -107,8 +108,6 @@ def DELCommand(mySocket, directory):
 
 def RSTCommand(mySocket, directory, username, password):
 	msgSent = 'RST ' + directory + '\n'
-
-	print(msgSent)
 
 	sendMessage(mySocket, msgSent)
 
