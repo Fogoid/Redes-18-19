@@ -42,13 +42,21 @@ if newPID == 0:
 			msgRecv = msgRecv.split(' ')
 			username = msgRecv[1]
 
-			msgRecv = User_Socket.recv(buffersize).decode()
-			msgSplit = msgRecv.split(' ')
+			msgRecv = b''
+			while True:
+				data = User_Socket.recv(buffersize)
+				if not data or data[-1:] == b'\n':
+					msgRecv += data
+					break
+				msgRecv += data
 
-			if CMDMatcher(msgSplit[0],'^UPL$'):
-					UPLCommand(msgRecv,User_Socket)
+			msgSplit = msgRecv.split(b' ')
+			msgSplit[-1] = msgSplit[-1].strip(b'\n')
 
-			elif CMDMatcher(msgSplit[0],'^RSB$'):
+			if CMDMatcher(msgSplit[0],b'^UPL$'):
+					UPRCommand(msgSplit,username, User_Socket)
+
+			elif CMDMatcher(msgSplit[0],b'^RSB$'):
 					RSBCommand(msgRecv,username,User_Socket)
 			else:
 				sendTCPError(User_Socket,address,port)

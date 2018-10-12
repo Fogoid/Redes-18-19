@@ -3,7 +3,7 @@ import sys
 import os
 from CSBaseFunctions import *
 
-def LSFCommand(BSSocket, BSIP, BSport, username, dirname):
+def LSFCommand(BSIP, BSport, username, dirname):
 	lsfMsg = 'LSF ' + username + ' ' + dirname + '\n'
 	msgRecv = communicateUDP(lsfMsg, BSIP, BSport)
 	print(splitedMsg)

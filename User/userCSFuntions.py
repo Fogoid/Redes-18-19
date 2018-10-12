@@ -64,10 +64,11 @@ def BCKCommand(mySocket, directory, username, password):
 			filesNumber += 1
 
 	msgSent += str(filesNumber) + filesInfo + '\n'
-	print(msgSent)
+
 	sendMessage(mySocket, msgSent)
 	bckRecv = (recvMessage(mySocket, 1).decode()).split(' ')
-
+	bckRecv[-1] = bckRecv[-1].strip('\n')
+	
 	if CMDMatcher(bckRecv[0], '^BKR$'):
 		if CMDMatcher(bckRecv[1], '^EOF$'):
 			print("Request cant be processed")
@@ -80,7 +81,7 @@ def BCKCommand(mySocket, directory, username, password):
 
 			mySocket.connect((bckRecv[1], int(bckRecv[2])))
 
-			UPLCommand(mySocket, directory, bckRecv[2:], username, password)
+			UPLCommand(mySocket, directory, bckRecv[3:], username, password)
 
 def DELCommand(mySocket, directory):
 	msgSent = "DEL " + directory + '\n'

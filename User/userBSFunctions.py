@@ -32,10 +32,10 @@ def RSBCommand(mySocket, directory, username, password):
 			print(directory + " restored successfully")
 
 def UPLCommand(mySocket, directory, filesInfoList, username, password):
+	
 	msgSent = 'UPL ' + directory + ' ' + filesInfoList[0]
 	msgSent = msgSent.encode()
 	data = b''
-	print(filesInfoList[0])
 	AUTCommand(mySocket, username, password)
 
 	for n in range(1, int(filesInfoList[0])+1):
@@ -44,7 +44,7 @@ def UPLCommand(mySocket, directory, filesInfoList, username, password):
 		msgSent += b' ' + fileInfo.encode() + b' ' + data
 
 	msgSent += b'\n'
-
+	print(msgSent, 'o que é que eu estou a mandar?')
 	sendMessage(mySocket, msgSent)
 	uplRecv = recvMessage(mySocket, 0).split(' ')
 

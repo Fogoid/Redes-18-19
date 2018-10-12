@@ -39,7 +39,7 @@ def BKRCommand(msgRecv, username, password, userSocket):
 			file = open('./' + usernameDirectory + '/' + splitedMsg[1] + '/IP_port.txt','r')
 			[address, port] = file.readline().split(' ')
 			file.close()
-			LSF_BS_msg += msgRecv[1]
+			LSF_BS_msg += splitedMsg[1]
 			filesKept = LSFCommand(address, port, username, splitedMsg[1])
 			common = notCommon(splitedMsg[2:], filesKept[1:])
 			BKR_user_msg += len(common)
@@ -70,7 +70,7 @@ def BKRCommand(msgRecv, username, password, userSocket):
 			file.close()
 
 			if CMDMatcher(status, '^OK\n$'):
-				BKR_user_msg += BSconnection.strip('\n') + ' ' + ' '.join(splitedMsg[3:])
+				BKR_user_msg += BSconnection.strip('\n') + ' ' + ' '.join(splitedMsg[2:])
 			else:
 				BKR_user_msg += 'ERR\n'
 	else:

@@ -61,6 +61,7 @@ def readFileData(directory, filename, size):
 
 #Writes data on a file
 def writeFileData(file, dataList, i):
+	print(dataList)
 	size = int(dataList[i+3].decode())
 	i += 4
 	data = dataList[i]
@@ -90,7 +91,7 @@ def readDirectory(username, directory):
 #Simple function that sends the specified message through TCP
 def sendTCPMessage(User_Socket, msg):
 	if not isinstance(msg, bytes):
-		msg.encode()
+		msg = msg.encode()
 	User_Socket.send(msg)
 
 #Sends a 'ERR' message

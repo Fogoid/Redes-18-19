@@ -6,14 +6,13 @@ from BSBaseFunctions import *
 
 def UPRCommand(message, username, userSocket):
 	uprMsg = 'UPR '
-	print(message)
-	if CMDMatcher(message, '^UPL\s[a-z]+[0-9]+\s'):
-		if not os.path.exists(directory):
-				os.makedirs(directory)
-		msg = 'Number of files: ' + message[1].decode()
-		index = 2
-		for n in range(0, int(message[1].decode())):
-			file = open('./' + directory + '/' + message[index].decode(), 'wb')
+
+	if CMDMatcher(message[0], b'^UPL$'):
+		if not os.path.exists('./user_' + username + '/' + message[1].decode()):
+				os.makedirs('./user_' + username + '/' + message[1].decode())
+		index = 3
+		for n in range(0, int(message[2].decode())):
+			file = open('./user_' + username + '/' + message[1].decode() + '/' + message[index].decode(), 'wb')
 			index = writeFileData(file, message, index)
 			file.close()
 		uprMsg += 'OK\n'
@@ -30,8 +29,8 @@ def RSBCommand(message, username, userSocket):
 	files_info = b''
 	file_number = 0
 
-	if CMDMatcher(message, '^RSB\s[a-z]+\n$'):
-		message = message.split(' ')
+	if CMDMatcher(message, b'^RSB\s[a-z]+\n$'):
+		message = message.decode().split(' ')
 		message[1] = message[1].rstrip('\n')
 		for (paths, dirnames, files) in os.walk('./' +usernameDirectory+'/'+message[1]):
 			for filename in files:
